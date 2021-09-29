@@ -192,22 +192,7 @@ return new ICadGenerator(){
 		}
 		
 
-		if(linkIndex!=d.getNumberOfLinks()-1 ){
-			LinkConfiguration confPrior = d.getLinkConfiguration(i+1);
-			def vitaminType = confPrior.getElectroMechanicalType()
-			def vitaminSize = confPrior.getElectroMechanicalSize()
-			//println "Adding Motor "+vitaminType
-			def motorLocation = new TransformNR(0,0,centerTheMotorsValue,new RotationNR())
-			if(linkIndex==0)
-				motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,180,0)))
-			if(linkIndex==1)
-					motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,-90,0)))
-			vitaminLocations.put(motorLocation, [
-				vitaminType,
-				vitaminSize
-			])
 
-		}
 
 		//CSG tmpSrv = moveDHValues(servo,dh)
 
@@ -360,6 +345,39 @@ return new ICadGenerator(){
 			})
 			allCad.add(baseOfArm)
 		}
+		if(linkIndex==2) {
+			allCad.addAll(ScriptingEngine.gitScriptRun(
+            "https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
+            "link3.groovy" , // file to load
+            // Parameters passed to the funcetion
+            [d, linkIndex]
+            ))
+		}
+		if(linkIndex==3) {
+			allCad.addAll(ScriptingEngine.gitScriptRun(
+			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
+			"wrist1.groovy" , // file to load
+			// Parameters passed to the funcetion
+			[d, linkIndex]
+			))
+		}
+		if(linkIndex==4) {
+			allCad.addAll(ScriptingEngine.gitScriptRun(
+			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
+			"wrist2.groovy" , // file to load
+			// Parameters passed to the funcetion
+			[d, linkIndex]
+			))
+		}
+		if(linkIndex==5) {
+			allCad.addAll(ScriptingEngine.gitScriptRun(
+			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
+			"wrist3.groovy" , // file to load
+			// Parameters passed to the funcetion
+			[d, linkIndex]
+			))
+		}
+		
 		//				CSG sparD = new Cube(gears.thickness,d.getDH_D(linkIndex),gears.thickness).toCSG()
 		//						.toYMin()
 		//						.toZMin()
