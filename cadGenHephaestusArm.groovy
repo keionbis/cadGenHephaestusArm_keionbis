@@ -29,7 +29,6 @@ import eu.mihosoft.vrl.v3d.RoundedCylinder
 import eu.mihosoft.vrl.v3d.Sphere
 import eu.mihosoft.vrl.v3d.Transform
 
-import com.neuronrobotics.bowlerstudio.vitamins.*;
 import javafx.scene.transform.Affine;
 import  eu.mihosoft.vrl.v3d.ext.quickhull3d.*
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter
@@ -37,6 +36,13 @@ import eu.mihosoft.vrl.v3d.Vector3d
 
 
 double grid =25
+double cornerOffset=grid*1.75
+double boardx=8.5*25.4+cornerOffset
+double boardy=11.0*25.4+cornerOffset
+// Scoot arm over so the paper doesn't awkwardly hang out over edge
+double cornerNudge = -10
+// radius of rounded corners on base plate
+double cornerRadius=5;
 
 CSG reverseDHValues(CSG incoming,DHLink dh ){
 	//println "Reversing "+dh
@@ -53,33 +59,46 @@ CSG moveDHValues(CSG incoming,DHLink dh ){
 
 return new ICadGenerator(){
 
-		static final int bracketOneKeepawayDistance = 50
-	//			private HashMap<String, GearManager>  map= new HashMap<>()
-	//			public  GearManager get(DHParameterKinematics b) {
-	//				if(map.get(b.getXml())==null) {
-	//					map.put(b.getXml(), new GearManager(b))
-	//				}
-	//				return map.get(b.getXml())
-	//			}
+    int bracketOneKeepawayDistance = 50
+
 	double motorGearPlateThickness = 10
-	double boardThickness =6.5
+	double boardThickness =10
 	
 	def thrustBearingSize = "Thrust_1andAHalfinch"
-	double centerTheMotorsValue=20;
 	double radiusOfGraspingObject=12.5;
-	double movingPartClearence =1.5
-	double linkThickness = 6
-	double linkYDimention = 20;
-	double GripperServoYOffset = 55
-	double hingeDiameter = 12
+	
+	double thrustBearing_inset_Into_bottom = 1
+	double topOfHornToBotomOfBaseLinkDistance = movingPartClearence-thrustBearing_inset_Into_bottom
+	
+
+	double GripperServoYOffset = 35
+	
+
+	
 	def cornerRad=2
 	String boltsize = "M5x25"
 	def insert=["heatedThreadedInsert", "M5"]
-	def insertCamera=["teeNutWithProngs", "M8"]
-	def cameraInsertLength = Vitamins.get( insertCamera[0],insertCamera[1]).getTotalZ()
-	HashMap<String,Object> measurmentsHorn = Vitamins.getConfiguration(  "LewanSoulHorn","round")
-	def hornKeepawayLen = measurmentsHorn.mountPlateToHornTop
-	double centerlineToOuterSurfacePositiveZ = centerTheMotorsValue+movingPartClearence+hornKeepawayLen-1
+	def insertCamera=["heatedThreadedInsert", "M5"]
+	def insertMeasurments= Vitamins.getConfiguration(insert[0],
+		insert[1])
+	double cameraInsertLength = insertMeasurments.installLength
+	
+	HashMap<String,Object> measurmentsMotor = Vitamins.getConfiguration(  "LewanSoulMotor","lx_224")
+	HashMap<String,Object> measurmentsHorn = Vitamins.getConfiguration(  measurmentsMotor.shaftType,measurmentsMotor.shaftSize)
+	
+	double motorz =  measurmentsMotor.body_z
+	double motorPassiveLinkSideWasherTHickness=measurmentsMotor.shoulderHeight
+	double hornKeepawayLen = measurmentsHorn.mountPlateToHornTop
+	double hornDiameter = measurmentsHorn.hornDiameter
+	double centerTheMotorsValue=motorz/2;
+	double linkYDimention = measurmentsMotor.body_x;
+	double movingPartClearence =motorPassiveLinkSideWasherTHickness
+	double totalMotorAndHorn = motorz+hornKeepawayLen+movingPartClearence;
+	
+	
+	
+	double linkThickness = hornKeepawayLen
+	double centerlineToOuterSurfacePositiveZ = centerTheMotorsValue+hornKeepawayLen
 	double centerlineToOuterSurfaceNegativeZ = -(centerTheMotorsValue+movingPartClearence+linkThickness)
 	CSG linkBuildingBlockRoundCyl = new Cylinder(linkYDimention/2,linkYDimention/2,linkThickness,30)
 		.toCSG()
@@ -103,6 +122,7 @@ return new ICadGenerator(){
 	double offsetValue = 0.6
 	@Override
 	public ArrayList<CSG> generateCad(DHParameterKinematics d, int linkIndex) {
+		System.out.println( "Total motor and horn length "+totalMotorAndHorn)
 		offset.setMM(offsetValue)
 		def vitaminLocations = new HashMap<TransformNR,ArrayList<String>>()
 		ArrayList<DHLink> dhLinks = d.getChain().getLinks()
@@ -127,6 +147,7 @@ return new ICadGenerator(){
 		def thrustMeasurments= Vitamins.getConfiguration("ballBearing",
 			thrustBearingSize)
 		def baseCorRad = thrustMeasurments.outerDiameter/2+5
+		
 		double servoAllignmentAngle=0
 		CSG gripperMotor=null;
 		TransformNR locationOfGripperHinge=null
@@ -136,20 +157,23 @@ return new ICadGenerator(){
 		def insertMeasurments= Vitamins.getConfiguration(insert[0],
 			insert[1])
 		if(linkIndex==0)
-			shaftLocation.translateY(zOffset)
+			shaftLocation.translateY(zOffset-topOfHornToBotomOfBaseLinkDistance)
 		else
 			shaftLocation.translateZ(centerTheMotorsValue)
 		vitaminLocations.put(shaftLocation, [
 				conf.getShaftType(),
 				conf.getShaftSize()
 		])
-		TransformNR locationOfBearing = locationOfMotorMount.copy().translateY(1)
+
+		TransformNR locationOfBearing = locationOfMotorMount.copy().translateY(thrustBearing_inset_Into_bottom)
 		if(linkIndex==0) {
 			vitaminLocations.put(locationOfBearing, [
 				"ballBearing",
 				thrustBearingSize
 			])
 		}
+		CSG vitamin_LewanSoulHorn_round_m3_bolts = Vitamins.get("LewanSoulHorn", "round_m3_bolts")
+
 		if(linkIndex==1) {
 			def mountBoltOne =locationOfMotorMount.copy()
 							.times(new TransformNR().translateZ(centerlineToOuterSurfacePositiveZ+linkThickness)
@@ -159,10 +183,10 @@ return new ICadGenerator(){
 									.translateY(+20))
 							
 			vitaminLocations.put(mountBoltOne,["capScrew", boltsize])
-			vitaminLocations.put(mountBoltOne.times(new TransformNR().translateZ(-linkThickness-hornKeepawayLen-0.5-insertMeasurments.installLength)),
+			vitaminLocations.put(mountBoltOne.times(new TransformNR().translateZ(-linkThickness-insertMeasurments.installLength)),
 				insert)
 			vitaminLocations.put(mountBoltTwo,["capScrew", boltsize])
-			vitaminLocations.put(mountBoltTwo.times(new TransformNR().translateZ(-linkThickness-hornKeepawayLen-0.5-insertMeasurments.installLength)),
+			vitaminLocations.put(mountBoltTwo.times(new TransformNR().translateZ(-linkThickness-insertMeasurments.installLength)),
 				insert)
 			
 		}
@@ -189,16 +213,11 @@ return new ICadGenerator(){
 					)
 			.translateY(-GripperServoYOffset)
 			.times(new TransformNR().translateZ(linkYDimention/2))
-//			.times(
-//				new TransformNR(0,0,0,new RotationNR(0,0,180))
-//				)
-				
+			
 			locationOfGripperHinge=locationOfServo
 			.copy()
 			.times(new TransformNR().translateY(hypot-hingeBackset))
-			.times(new TransformNR(0,0,0,new RotationNR(0,0,-90)))
-			.times(new TransformNR().translateZ(linkYDimention/2))
-			.times(new TransformNR().translateX(-linkYDimention/2))
+			
 //			.translateY(-hingeBackset*Math.sin(Math.toRadians(servoAllignmentAngle))-8)
 //			.translateX(hypot-hingeBackset)
 			
@@ -288,10 +307,12 @@ return new ICadGenerator(){
 		def actuatorCircle = tipCupCircle.transformed(actuatorSpace)
 		def actuatorCirclekw = linkBuildingBlockRoundCyl.movez(centerlineToOuterSurfacePositiveZ).transformed(actuatorSpace)
 		def passivLinkLug = gripperLug.transformed(actuatorSpace)
-		
+		double offsetOfLinks=0.0
+		double braceBackSetFromMotorLinkTop=1.0
 		if(linkIndex==1) {
-			double braceDistance=-5;
-			double linkClearence = 18.5
+			double braceDistance=-hornDiameter/2;
+			
+			double linkClearence = totalMotorAndHorn/2
 			def mountMotorSidekw = linkBuildingBlockRoundCyl
 										.movez(centerTheMotorsValue)
 										.movex(-linkClearence-movingPartClearence)
@@ -307,34 +328,34 @@ return new ICadGenerator(){
 			def clearencelugMotorSide = mountMotorSide.movex(-dh.getR()+bracketOneKeepawayDistance)
 			def clearencelugMotorSidekw = mountMotorSidekw.movex(-dh.getR()+bracketOneKeepawayDistance)
 			def clearencelugPassiveSide = mountPassiveSide.movex(-dh.getR()+bracketOneKeepawayDistance)
-			CSG motorLink = actuatorCircle.movez(-0.5).movex(bracketOneKeepawayDistance)
-			CSG motorLinkkw = actuatorCirclekw.movez(-0.5).movex(bracketOneKeepawayDistance)
+			CSG motorLink = actuatorCircle.movez(-offsetOfLinks).movex(bracketOneKeepawayDistance)
+			CSG motorLinkkw = actuatorCirclekw.movez(-offsetOfLinks).movex(bracketOneKeepawayDistance)
 			def bracemountPassiveSideAlligned = linkBuildingBlockRound
 													.movez(centerlineToOuterSurfacePositiveZ)
-													.movez(-0.5)
+													.movez(-offsetOfLinks)
 													.movey(braceDistance)
 													.movex(-linkClearence-movingPartClearence-dh.getR()+bracketOneKeepawayDistance)
 			def bracemountMotorSide=actuatorCircle
-									.movez(-0.5)
-									.movex(bracketOneKeepawayDistance-linkYDimention/2)
+									.movez(-braceBackSetFromMotorLinkTop)
+									.movex(dh.getR()-hornDiameter*1.5)
 									.movey(braceDistance)
 										
 			def brace = CSG.unionAll([
 				bracemountMotorSide,
-				bracemountPassiveSideAlligned
+				bracemountPassiveSideAlligned.movez(-braceBackSetFromMotorLinkTop)
 				]).hull()
 			brace = brace
 						.union([
 							brace
-							.movez(-centerlineToOuterSurfacePositiveZ+centerlineToOuterSurfaceNegativeZ+0.5),
+							.movez(-centerlineToOuterSurfacePositiveZ+centerlineToOuterSurfaceNegativeZ+offsetOfLinks+braceBackSetFromMotorLinkTop),
 							clearencelugMotorSide,clearencelugPassiveSide
 							]
 						).hull()
 			def passiveSide = mountPassiveSideAlligned.union(passivLinkLug).hull()
 			def motorSidePlate = CSG.hullAll([clearencelugMotorSide,mountMotorSide]);
-			motorSidePlate=CSG.hullAll([motorSidePlate,motorSidePlate.toZMax().movez(centerlineToOuterSurfacePositiveZ-0.5)])
+			motorSidePlate=CSG.hullAll([motorSidePlate,motorSidePlate.toZMax().movez(centerlineToOuterSurfacePositiveZ-offsetOfLinks)])
 			def motorSidePlatekw = CSG.hullAll([clearencelugMotorSidekw,mountMotorSidekw]);
-			motorSidePlatekw=CSG.hullAll([motorSidePlatekw,motorSidePlatekw.toZMax().movez(centerlineToOuterSurfacePositiveZ-0.5)])
+			motorSidePlatekw=CSG.hullAll([motorSidePlatekw,motorSidePlatekw.toZMax().movez(centerlineToOuterSurfacePositiveZ-offsetOfLinks)])
 			
 			def center = CSG.unionAll([mountPassiveSideAlligned,mountMotorSide,clearencelugMotorSide,clearencelugPassiveSide])
 							.hull()
@@ -342,32 +363,29 @@ return new ICadGenerator(){
 							.rotz(180)
 							.movez(centerTheMotorsValue)
 							.transformed(actuatorSpace)
-			CSG MotorMountBracketkw = actuatorCirclekw.movez(-0.5)
+			CSG MotorMountBracketkw = actuatorCirclekw.movez(-offsetOfLinks)
 							.union(motorLinkkw)
 							.hull()
-			CSG MotorMountBracket = actuatorCircle.movez(-0.5)
+			CSG MotorMountBracket = actuatorCircle.movez(-offsetOfLinks)
 							.union(motorLink)
 							.hull()
 							.difference(vitamins)
 			def FullBracket =CSG.unionAll([center,passiveSide,brace])
-							.difference(motorSidePlatekw.getBoundingBox())
+							//.difference(motorSidePlatekw.getBoundingBox())
+							.difference(MotorMountBracket)
+							.union(motorSidePlate)
 							.difference(vitamins)
 							.difference(motorToCut)
-							.difference(MotorMountBracketkw.getBoundingBox())
-			def finalMiddlePlate = motorSidePlate
-								.difference(vitamins)
+
 								
 			
-			finalMiddlePlate.setColor(javafx.scene.paint.Color.GREENYELLOW)
 			MotorMountBracket.setColor(javafx.scene.paint.Color.DARKCYAN)
 			FullBracket.setColor(javafx.scene.paint.Color.YELLOW)
 			MotorMountBracket.setManipulator(manipulator)
 			FullBracket.setManipulator(manipulator)
-			finalMiddlePlate.setManipulator(manipulator)
 			FullBracket.setName("MiddleLinkMainBracket")
 			MotorMountBracket.setName("MiddleLinkActuatorBracket")
-			finalMiddlePlate.setName("MiddleLinkMiddleBracket")
-			allCad.addAll(FullBracket,MotorMountBracket,finalMiddlePlate)
+			allCad.addAll(FullBracket,MotorMountBracket)
 		}
 		if(linkIndex==2) {
 			CSG objectToGrab = new Sphere(radiusOfGraspingObject,32,16).toCSG()
@@ -408,49 +426,25 @@ return new ICadGenerator(){
 			
 			
 			
-			def servoCube = linkBuildingBlock.toXMax().movez(centerlineToOuterSurfacePositiveZ-0.5).roty(90).transformed(gripperSpace)	
-			def rightServoCube = linkBuildingBlock
-								.toZMax()
-								.toXMin()
-								.movez(-centerlineToOuterSurfaceNegativeZ)
-								.roty(-90)
-								.transformed(gripperSpace)
+			def servoCube = linkBuildingBlock.toXMax().movez(centerlineToOuterSurfacePositiveZ-offsetOfLinks).roty(90).transformed(gripperSpace)	
+			def rightServoCube = linkBuildingBlock.toZMax().toXMin().movez(-centerlineToOuterSurfaceNegativeZ).roty(-90).transformed(gripperSpace)
 			
 			def servoBracket = servoCube.union(rightServoCube).hull()
 			def supportBracket = rightServoCube.union(passivLinkLug).hull()
-			def hingeBarrel = new RoundedCylinder(hingeDiameter/2,linkYDimention)
-			.cornerRadius(cornerRad)
-			.toCSG()
-			.toZMax()
-			def innerBarrel = hingeBarrel
-			.toXMax()
-			.movex(-centerlineToOuterSurfaceNegativeZ)
-			def linkToCup = rightServoCube.union(
-				[gripperLug
-				.movez(-linkYDimention/2)
-				.transformed(hinge),
-				hingeBarrel.movez(-linkYDimention/2-linkThickness/2).transformed(hinge)
-				]
-				).hull()
-			
-			def ActuatorBracket = servoCube.union(actuatorCircle.movez(-0.5)).hull()
+			def linkToCup = rightServoCube.union(gripperLug).hull()
+			def ActuatorBracket = servoCube.union(actuatorCircle.movez(-offsetOfLinks)).hull()
 									.difference(vitamins)
 			
 			CSG pincherCup = new  Cylinder(radiusOfGraspingObject/2,5).toCSG()
 	
-			def pincherBracket = gripperLug.union(
-				[pincherCup
-					]
-				).hull()
-				.rotx(90)
-				.rotz(-servoAllignmentAngle)
-				.union(innerBarrel.transformed(hinge)).hull()				
-			  //.times(new TransformNR(0,0,0,new RotationNR(0,0,90)))
+			def pincherBracket = gripperLug.union(pincherCup).hull()
 			
 			
-			
-			
-			
+			double hingeDiameter = 10
+			def hingeBarrel = new RoundedCylinder(hingeDiameter/2,linkYDimention)
+									.cornerRadius(cornerRad)
+									.toCSG()
+									.toZMax()
 			def hingeLinkHole = new Cylinder(1,linkYDimention).toCSG()
 									.toZMax()
 									.movex(centerlineToOuterSurfaceNegativeZ*2/3)
@@ -461,7 +455,9 @@ return new ICadGenerator(){
 									.movex(hingeDiameter+movingPartClearence)
 									.movez(-linkYDimention/2)
 									.transformed(hinge)
-		
+			def innerBarrel = hingeBarrel
+											.toXMax()
+											.movex(-centerlineToOuterSurfaceNegativeZ)
 			def hingeBrace = innerBarrel
 								.transformed(hinge)
 								.union(servoCube).union(rightServoCube)
@@ -481,7 +477,7 @@ return new ICadGenerator(){
 							.toXMin()
 							.toZMax()
 							.movex(centerlineToOuterSurfaceNegativeZ-linkThickness)
-							.movey(20)
+							.movey(21)
 							.transformed(hinge)
 			def movingHingeBarrel =  new Cylinder(hingeDiameter/2,linkThickness).toCSG()
 											.movez(-linkYDimention/2-linkThickness/2)
@@ -491,14 +487,10 @@ return new ICadGenerator(){
 										)
 								.hull()
 								.transformed(hinge)
-								.union(movingCupHingeLug.union(tipCupCircle
-																.rotx(90)
-																.rotz(-servoAllignmentAngle)).hull())
+								.union(movingCupHingeLug.union(tipCupCircle).hull())
 								.difference(hingeLinkHole.transformed(hinge))
 								.difference(hingeHole.transformed(hinge))
 			def gripperMovingCupstl = tipCupCircle.union(pincherCup).hull()
-								.rotx(90)	
-								.rotz(-servoAllignmentAngle)		
 								.union(movingPart)
 								.difference(objectToGrab)
 								.difference(knotches)
@@ -541,13 +533,13 @@ return new ICadGenerator(){
 		}
 		
 		if(linkIndex==0) {
-			def z = dh.getD()-10-movingPartClearence/2
-			def supportBeam= new RoundedCube(linkYDimention+linkThickness*2.5,40+linkThickness*2,z)
+			def z = dh.getD()-linkYDimention/2-movingPartClearence
+			def supportBeam= new RoundedCube(linkYDimention+linkThickness*2.0,40+linkThickness*2,z)
 								.cornerRadius(cornerRad)
 								.toCSG()
 								.toZMax()
 			
-			def	baseOfArm = Parabola.coneByHeight(baseCorRad, 35)
+			def	baseOfArm = Parabola.coneByHeight(baseCorRad, 25)
 						.rotx(90)
 						.toZMin()
 						.movez(movingPartClearence)
@@ -606,24 +598,35 @@ return new ICadGenerator(){
 		double baseCoreheight = 1;
 		def insertMeasurments= Vitamins.getConfiguration(insert[0],
 			insert[1])
-		double xOffset = grid*7;
-		double yOffset = grid*6;
+		double xOffset = grid*7.5;
+		double yOffset = -grid*0.5;
+		def cameraHeight_parameterized
+		def cameraHeight_default = (25.4*9.67)
+		cameraHeight_parameterized = new LengthParameter("Camera Stand Height",cameraHeight_default,[cameraHeight_default+200,cameraHeight_default-200])
+		def cameraHeight = cameraHeight_parameterized.getMM();
 		def cameraNut = new TransformNR(xOffset+grid/2,yOffset+grid/2,0,new RotationNR(0,0,0))
-		CSG cameraBoltHole = new Cylinder(4.1,cameraInsertLength+2).toCSG()
+		
+		CSG cameraBoltHole = new Cylinder(2.5,cameraInsertLength+cameraHeight+2).toCSG()
+		CSG cameraCone =  new Cylinder(grid/2, // Radius at the bottom
+                      		insertMeasurments.diameter/2+2, // Radius at the top
+                      		cameraHeight, // Height
+                      		(int)8 //resolution
+                      		).toCSG()//convert to CSG to display 
+							 .transformed(TransformFactory.nrToCSG(cameraNut))
 		def mountLoacionsCamera = [
 			new TransformNR(xOffset,yOffset,0,new RotationNR(180,0,0)),
 			new TransformNR(xOffset,yOffset+grid,0,new RotationNR(180,0,0)),
 			new TransformNR(xOffset+grid,yOffset,0,new RotationNR(180,0,0)),
 			new TransformNR(xOffset+grid,yOffset+grid,0,new RotationNR(180,0,0))
 		]
-		def corners =[]
+		def corners =[cameraCone.movez(1)]
 		for(TransformNR t:mountLoacionsCamera) {
 			def tr = TransformFactory.nrToCSG(t)
-			corners.add(cameraBuildingBlockRound.toZMax().transformed(tr)
+			corners.add(cameraBuildingBlockRound.toZMax().transformed(tr).movez(1)
 				)
 				
 		}
-		vitaminLocations.put(cameraNut.copy(), [
+		vitaminLocations.put(cameraNut.copy().translateZ(cameraHeight-cameraInsertLength+1), [
 			insertCamera[0],
 			insertCamera[1]
 		])
@@ -664,14 +667,14 @@ return new ICadGenerator(){
 			if(locationOfBearing.getZ()>baseCoreheight)
 				baseCoreheight=locationOfBearing.getZ()
 			locationOfMotorMount.translateZ(-zOffset)
-			TransformNR pinionRoot = locationOfMotorMount.copy()
+			TransformNR pinionRoot = locationOfMotorMount.copy().translateZ(topOfHornToBotomOfBaseLinkDistance+1)
 			def extractionLocationOfMotor =locationOfMotorMount.copy().translateZ(-20)
 
 			vitaminLocations.put(locationOfBearing.copy().translateZ(-1), [
 				"ballBearing",
 				thrustBearingSize
 			])
-			vitaminLocations.put(locationOfMotorMount, [
+			vitaminLocations.put(locationOfMotorMount.copy().translateZ(topOfHornToBotomOfBaseLinkDistance+1), [
 				conf.getElectroMechanicalType(),
 				conf.getElectroMechanicalSize()
 			])
@@ -684,6 +687,10 @@ return new ICadGenerator(){
 				conf.getShaftType(),
 				conf.getShaftSize()
 			])
+//			vitaminLocations.put(pinionRoot.copy().translateZ(3), [
+//				conf.getShaftType(),
+//				conf.getShaftSize()
+//			])
 		}
 		
 		double yOffsetFeducial = baseGrid*4
@@ -693,11 +700,10 @@ return new ICadGenerator(){
 			new TransformNR(baseGrid+yOffsetFeducial,yOffsetFeducial,0,new RotationNR(180,0,0)),// feducial
 			new TransformNR(yOffsetFeducial-baseGrid,0,0,new RotationNR(180,0,0)),// feducial
 			new TransformNR(baseGrid+yOffsetFeducial,-yOffsetFeducial,0,new RotationNR(180,0,0)),// feducial
-			new TransformNR(-baseGrid, baseGrid*7,0,new RotationNR(180,0,0)),// corner mount
-			new TransformNR( baseGrid*8, -baseGrid*5,0,new RotationNR(180,0,0)),// corner mount
-			new TransformNR( baseGrid*8,0,0,new RotationNR(180,0,0)),// corner mount
-			new TransformNR( -baseGrid, -baseGrid*5,0,new RotationNR(180,0,0))// corner mount
+
 		]
+
+		
 		def mountLoacions = [
 			new TransformNR(baseGrid,0,0,new RotationNR(180,0,0)),//base
 			new TransformNR(-baseGrid,baseGrid,0,new RotationNR(180,0,0)),//base
@@ -718,6 +724,19 @@ return new ICadGenerator(){
 					insert)
 
 		}
+		def mountLocationsCorners = [
+			//new TransformNR(-(boardx/2 - cornerRadius), -(boardy/2 - cornerRadius),0,new RotationNR(180,0,0)),// corner mount
+			//new TransformNR(-(boardx/2 - cornerRadius),  (boardy/2 - cornerRadius),0,new RotationNR(180,0,0)),// corner mount
+			//new TransformNR( (boardx/2 - cornerRadius), -(boardy/2 - cornerRadius),0,new RotationNR(180,0,0)),// corner mount
+			//new TransformNR( (boardx/2 - cornerRadius),  (boardy/2 - cornerRadius),0,new RotationNR(180,0,0))// corner mount
+			]
+		mountLocationsCorners.forEach{
+			vitaminLocations.put(it.copy().translateZ(-boardThickness),
+					["capScrew", boltsize])
+			vitaminLocations.put(it.copy().translateZ(insertMeasurments.installLength),
+					insert)
+
+		}
 		mountLoacionsCamera.forEach{
 			vitaminLocations.put(it.copy().translateZ(-boardThickness),
 					["capScrew", boltsize])
@@ -729,7 +748,7 @@ return new ICadGenerator(){
 		TransformNR centerOfMassFromCentroid=new TransformNR();
 		def vitamins=[]
 		mountLoacionsCamera.forEach{
-			vitamins.add(new Cylinder(5.75/2,cameraInsertLength+1)
+			vitamins.add(new Cylinder(5.75/2,cameraInsertLength)
 				.toCSG()
 				.toZMax()
 				.transformed(TransformFactory.nrToCSG(it))
@@ -747,7 +766,7 @@ return new ICadGenerator(){
 			CSG part = vitaminCad.transformed(move)
 			part.setManipulator(b.getRootListener())
 			vitamins.add(part)
-			part.setManufacturing({inciming->return null})
+
 			def massCentroidYValue = measurments.massCentroidY
 			def massCentroidXValue = measurments.massCentroidX
 			def massCentroidZValue = measurments.massCentroidZ
@@ -764,6 +783,16 @@ return new ICadGenerator(){
 
 			//do com calculation here for centerOfMassFromCentroid and totalMass
 		}
+		
+		cameraBlock=cameraBlock.difference(vitamins)
+		cameraBlock.setParameter(cameraHeight_parameterized)
+		cameraBlock.setColor(javafx.scene.paint.Color.BLUE)
+		cameraBlock.setName("CameraStandMount")
+		cameraBlock.setManufacturing ({ mfg ->
+			return mfg.toZMin()
+		})
+		cameraBlock.setManipulator(b.getRootListener())
+		
 		//Do additional CAD and add to the running CoM
 		def thrustMeasurments= Vitamins.getConfiguration("ballBearing",
 				thrustBearingSize)
@@ -798,53 +827,88 @@ return new ICadGenerator(){
 					)
 		}
 		
-		
-		
-//		def calibrationFrame = TransformFactory.nrToCSG(locationOfCalibration)
-//								.movex(centerlineToOuterSurfaceNegativeZ)
-//		def calibrationFramemountUnit=mountUnit
-//										.rotx(180)
-//										.toYMin()
-//										.transformed(calibrationFrame)
-//										.toZMin()
-									
+		def locationOfCalibration = new TransformNR(0,-50,15, new RotationNR())
+		DHParameterKinematics dev = b.getAllDHChains().get(0)
+		//dev.setDesiredTaskSpaceTransform(locationOfCalibration, 0);
+		def jointSpaceVect = dev.inverseKinematics(dev.inverseOffset(locationOfCalibration));
+		def poseInCal = dev.forwardOffset(dev.forwardKinematics(jointSpaceVect));
+		println "\n\nCalibration Values "+jointSpaceVect+"\n at pose: "+poseInCal+"\n\n"
+				
+		def calibrationFrame = TransformFactory.nrToCSG(locationOfCalibration)
+								.movex(centerlineToOuterSurfaceNegativeZ)
+		def calibrationFramemountUnit=mountUnit
+										.rotx(180)
+										.toYMin()
+										.transformed(calibrationFrame)
+										.toZMin()
+										
 		// assemble the base
-//		def calibrationTipKeepaway =new RoundedCylinder(linkYDimention/2,centerlineToOuterSurfacePositiveZ-centerlineToOuterSurfaceNegativeZ)
-//											.cornerRadius(cornerRad)
-//											.toCSG()
-//											.roty(-90)
-//									.transformed(calibrationFrame)
-		//coreParts.add(calibrationTipKeepaway)			
+		def calibrationTipKeepaway =new RoundedCylinder(linkYDimention/2,centerlineToOuterSurfacePositiveZ-centerlineToOuterSurfaceNegativeZ)
+											.cornerRadius(cornerRad)
+											.toCSG()
+											.roty(-90)
+									.transformed(calibrationFrame)
+		coreParts.add(calibrationTipKeepaway)			
 		def cordCutter = new Cube(10,40,30).toCSG()
 							.toYMin()
 							.toZMax()
-							.movez(baseCoreheight-37)	
+							.movez(baseCoreheight-37)
+							.movez(topOfHornToBotomOfBaseLinkDistance+5)
+		//pcbScrewXSpacing
+		//pcbScrewYSpacing
+	    //pcbScrewMountHeight
 		
+
+		
+							
 		def points = [	new Vector3d(10,0,0),
 					new Vector3d(0, 0, 5),
 					new Vector3d(0, -3, 0),
 					new Vector3d(0, 3, 0)
 		]
 		CSG pointer = HullUtil.hull(points)
-		cameraBlock=cameraBlock.difference(vitamins)
-		cameraBlock.setColor(javafx.scene.paint.Color.BLUE)
-		cameraBlock.setName("CameraStandMount")
-		cameraBlock.setManufacturing ({ mfg ->
-			return mfg.roty(180).toZMin()
-		})
-		cameraBlock.setManipulator(b.getRootListener())
 		
-		allCad.add(cameraBlock)
 		def Base = CSG.unionAll(coreParts)
-				//.union(calibrationFramemountUnit)
-				//.union(calibrationFramemountUnit.mirrory())
+				.union(calibrationFramemountUnit)
+				.union(calibrationFramemountUnit.mirrory())
 				//.difference(vitamin_roundMotor_WPI_gb37y3530bracketOneKeepawayDistanceen)
 				.difference(vitamins)
-				//.difference(calibrationTipKeepaway)
-				.difference(cordCutter)
+				.difference(calibrationTipKeepaway)
+				.difference(cordCutter);
+				
+			
+
+				
 		Base = Base.intersect(Base.getBoundingBox().toXMin().movex(-baseCorRad))		
 		Base = Base.union(pointer.movex(Base.getMaxX()-2))
 						.union(pointer.rotz(90).movey(-baseCorRad+2))
+
+		def pcbmount = ScriptingEngine.gitScriptRun(
+				"https://github.com/Hephaestus-Arm/HephaestusArm2.git", // git location of the library
+				"pcbmountpoints.groovy" , // file to load
+				// Parameters passed to the funcetion
+				[45.72, //Holes X Spacing
+					0, //Holes Y Spacing
+					5, //Pillar Dia
+					1.8, //Hole Dia
+					2, //Height
+				])
+		
+		def pcbmounttop = ScriptingEngine.gitScriptRun(
+			"https://github.com/Hephaestus-Arm/HephaestusArm2.git", // git location of the library
+			"pcbmountpoints.groovy" , // file to load
+			// Parameters passed to the funcetion
+			[0, //Holes X Spacing
+				0, //Holes Y Spacing
+				5, //Pillar Dia
+				1.8, //Hole Dia
+				2, //Height
+			])
+		double extra = Math.abs(Base.getMinX())
+		pcbmount = pcbmount.union(pcbmounttop.movey(40)).rotz(90).roty(90).movex(Base.getMinX())
+		pcbmount = pcbmount.movez(-pcbmount.getMinZ()+2)
+
+
 		Base.setColor(javafx.scene.paint.Color.PINK)
 		// add it to the return list
 		Base.setManipulator(b.getRootListener())
@@ -853,24 +917,58 @@ return new ICadGenerator(){
 			return null;
 		})
 		}
-		double extra = Math.abs(Base.getMinX())
-		double cornerOffset=grid*1.75
-		double boardx=8.5*25.4+cornerOffset
-		double boardy=11.0*25.4+cornerOffset
+
+
+		Base = Base.union(pcbmount)
+
+
 		def paper = new Cube(8.5*25.4,11.0*25.4,1).toCSG()
 						.toZMax()
 						.toXMin()
 						.movez(1)
 						.movex(-extra)
 						.difference(boltHolePattern)
-		def board = new Cube(boardx,boardy,boardThickness).toCSG()
-						.toZMax()
+
+		
+		allCad.add(cameraBlock)
+
+		// Cyl for radius
+		def cornerCyl = new Cylinder(cornerRadius,cornerRadius,boardThickness,80).toCSG();
+
+		
+		// Make 4 copies and hull them.
+		def board = CSG.hullAll([
+			cornerCyl.movex(-(boardx/2 - cornerRadius)).movey(-(boardy/2 - cornerRadius)),
+			cornerCyl.movex(-(boardx/2 - cornerRadius)).movey((boardy/2 - cornerRadius)),
+			cornerCyl.movex((boardx/2 - cornerRadius)).movey(-(boardy/2 - cornerRadius)),
+			cornerCyl.movex((boardx/2 - cornerRadius)).movey((boardy/2 - cornerRadius))			
+			])
+		
+		// hacky non vitamin hole solution
+		
+		def holeCyl = new Cylinder(5,5,boardThickness+1,80).toCSG().movez(-0.5)
+		double holenudge = 10
+		def hackyholes = CSG.unionAll([
+			holeCyl.movex(-(boardx/2 - cornerRadius - holenudge)).movey(-(boardy/2 - cornerRadius - holenudge)),
+			holeCyl.movex(-(boardx/2 - cornerRadius - holenudge)).movey((boardy/2 - cornerRadius - holenudge)),
+			holeCyl.movex((boardx/2 - cornerRadius - holenudge)).movey(-(boardy/2 - cornerRadius - holenudge)),
+			holeCyl.movex((boardx/2 - cornerRadius - holenudge)).movey((boardy/2 - cornerRadius - holenudge))
+			])
+		board = board.difference(hackyholes)
+
+		board = board.movex(cornerNudge).movey(cornerNudge)
+		
+		board = board.toZMax()
 						.toXMin()
 						.movex(-extra)
 						.movey(cornerOffset/2)
 						//.difference(boltHolePattern)
 						.difference(vitamins)
-		board.setColor(javafx.scene.paint.Color.SANDYBROWN)
+		
+
+						
+		
+		board.setColor(javafx.scene.paint.Color.WHITESMOKE)
 		def cardboard = new Cube(boardx,boardy,2).toCSG()
 		.toZMax()
 		.toXMin()
@@ -879,6 +977,7 @@ return new ICadGenerator(){
 		.movez(-boardThickness)
 		.difference(boltHoleKeepawayPattern)
 		.difference(vitamins)
+
 		cardboard.setColor(javafx.scene.paint.Color.SADDLEBROWN)
 		
 		cardboard.addExportFormat("svg")
@@ -894,37 +993,15 @@ return new ICadGenerator(){
 			return mfg.toZMin()
 		})
 		paper.setColor(javafx.scene.paint.Color.WHITE)
-		allCad.addAll(Base,paper,board,cardboard)
+		
+		allCad.addAll(Base,paper,pcbmount,board)//cardboard,board,paper
 		Base.addExportFormat("stl")
 		Base.addExportFormat("svg")
 		Base.setName("BaseMount")
 		b.setMassKg(totalMass)
 		b.setCenterOfMassFromCentroid(centerOfMassFromCentroid)
 		
-		double calibrationHeight=25
-		double coneOffset=-5
-		def locationOfCalibration = new TransformNR(0,100,calibrationHeight, new RotationNR())
-		DHParameterKinematics dev = b.getAllDHChains().get(0)
-		//dev.setDesiredTaskSpaceTransform(locationOfCalibration, 0);
-		def jointSpaceVect = dev.inverseKinematics(dev.inverseOffset(locationOfCalibration));
-		println "\n\nCalibration Joint Values "+jointSpaceVect+"\n\n"
-		def calibrationFrame = TransformFactory.nrToCSG(locationOfCalibration)
-		CSG objectToGrab = new Sphere(radiusOfGraspingObject,32,16).toCSG()
-							//.movez(25)
-		CSG post = Parabola.coneByHeight(8, calibrationHeight+coneOffset)
-					.rotx(90)
-					.toZMax()
-					.movez(coneOffset)
-		CSG calibration = objectToGrab.union(post)
-							.transformed(calibrationFrame)
-							//.movey(-100)
-							.difference(vitamins)
-		calibration.setName("CalibrationObject-"+jointSpaceVect[0]+"-"+jointSpaceVect[1]+"-"+jointSpaceVect[2])				
-		calibration.setColor(javafx.scene.paint.Color.LIME)
-		allCad.add(calibration)
-		
 		allCad.addAll(vitamins)
 		return allCad;
 	}
 };
-
