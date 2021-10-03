@@ -6,6 +6,8 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine
 import com.neuronrobotics.bowlerstudio.BowlerStudio
 import com.neuronrobotics.bowlerstudio.creature.CreatureLab;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.params.AllClientPNames
+
 import com.neuronrobotics.bowlerstudio.vitamins.*;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink
 import com.neuronrobotics.sdk.addons.kinematics.DHLink
@@ -158,12 +160,16 @@ return new ICadGenerator(){
 			insert[1])
 		if(linkIndex==0)
 			shaftLocation.translateY(zOffset-topOfHornToBotomOfBaseLinkDistance)
-		else
+		else if(linkIndex==1) {
 			shaftLocation.translateZ(centerTheMotorsValue)
-		vitaminLocations.put(shaftLocation, [
-				conf.getShaftType(),
-				conf.getShaftSize()
-		])
+			
+		}
+		if(linkIndex==0 || linkIndex==1) {
+				vitaminLocations.put(shaftLocation, [
+					conf.getShaftType(),
+					conf.getShaftSize()
+			])
+		}
 
 		TransformNR locationOfBearing = locationOfMotorMount.copy().translateY(thrustBearing_inset_Into_bottom)
 		if(linkIndex==0) {
@@ -192,8 +198,58 @@ return new ICadGenerator(){
 		}
 		
 
+		if(linkIndex==2||linkIndex==1||linkIndex==0 ){
+			LinkConfiguration confPrior = d.getLinkConfiguration(i+1);
+			def vitaminType = confPrior.getElectroMechanicalType()
+			def vitaminSize = confPrior.getElectroMechanicalSize()
+			//println "Adding Motor "+vitaminType
+			def motorLocation = new TransformNR(0,0,centerTheMotorsValue,new RotationNR())
+			if(linkIndex==0)
+				motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,180,0)))
+			if(linkIndex==1)
+					motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,-90,0)))
+			if(linkIndex==2)
+				motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,-90,0)))
+			vitaminLocations.put(motorLocation, [
+				vitaminType,
+				vitaminSize
+			])
 
-
+		}
+	
+		if(linkIndex==2) {
+			allCad.addAll(ScriptingEngine.gitScriptRun(
+			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
+			"link3.groovy" , // file to load
+			// Parameters passed to the funcetion
+			[d, linkIndex,centerTheMotorsValue]
+			))
+		}
+		if(linkIndex==3) {
+			allCad.addAll(ScriptingEngine.gitScriptRun(
+			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
+			"wrist1.groovy" , // file to load
+			// Parameters passed to the funcetion
+			[d, linkIndex,centerTheMotorsValue]
+			))
+		}
+		if(linkIndex==4) {
+			allCad.addAll(ScriptingEngine.gitScriptRun(
+			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
+			"wrist2.groovy" , // file to load
+			// Parameters passed to the funcetion
+			[d, linkIndex,centerTheMotorsValue]
+			))
+		}
+		if(linkIndex==5) {
+			allCad.addAll(ScriptingEngine.gitScriptRun(
+			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
+			"wrist3.groovy" , // file to load
+			// Parameters passed to the funcetion
+			[d, linkIndex,centerTheMotorsValue]
+			))
+		}
+		
 		//CSG tmpSrv = moveDHValues(servo,dh)
 
 		//Compute the location of the base of this limb to place objects at the root of the limb
@@ -345,39 +401,6 @@ return new ICadGenerator(){
 			})
 			allCad.add(baseOfArm)
 		}
-		if(linkIndex==2) {
-			allCad.addAll(ScriptingEngine.gitScriptRun(
-            "https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
-            "link3.groovy" , // file to load
-            // Parameters passed to the funcetion
-            [d, linkIndex]
-            ))
-		}
-		if(linkIndex==3) {
-			allCad.addAll(ScriptingEngine.gitScriptRun(
-			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
-			"wrist1.groovy" , // file to load
-			// Parameters passed to the funcetion
-			[d, linkIndex]
-			))
-		}
-		if(linkIndex==4) {
-			allCad.addAll(ScriptingEngine.gitScriptRun(
-			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
-			"wrist2.groovy" , // file to load
-			// Parameters passed to the funcetion
-			[d, linkIndex]
-			))
-		}
-		if(linkIndex==5) {
-			allCad.addAll(ScriptingEngine.gitScriptRun(
-			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
-			"wrist3.groovy" , // file to load
-			// Parameters passed to the funcetion
-			[d, linkIndex]
-			))
-		}
-		
 		//				CSG sparD = new Cube(gears.thickness,d.getDH_D(linkIndex),gears.thickness).toCSG()
 		//						.toYMin()
 		//						.toZMin()
