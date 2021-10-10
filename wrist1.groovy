@@ -44,10 +44,16 @@ AbstractLink abstractLink = d.getAbstractLink(linkIndex);
 // Transform used by the UI to render the location of the object
 Affine manipulator = dh.getListener();
 
-CSG vitaminCad=   Vitamins.get(	d.getLinkConfiguration(linkIndex-1).getShaftType(),
-								d.getLinkConfiguration(linkIndex-1).getShaftSize())
+def type=	d.getLinkConfiguration(linkIndex-1).getShaftType()
+def size = d.getLinkConfiguration(linkIndex-1).getShaftSize()
+CSG vitaminCad=   Vitamins.get(	type,size)
 				.movez(args[2])
 vitaminCad=moveDHValues(vitaminCad,dh)
+def mountPlateToHornTop = Vitamins.getConfiguration(type,size).get("mountPlateToHornTop")
+def bearingHeight =args[2]+mountPlateToHornTop-2
+CSG thrust = moveDHValues(Vitamins.get("ballBearing","Thrust_1andAHalfinch")
+						.movez(bearingHeight),dh)
+thrust.setManipulator(manipulator)
 
 vitaminCad.setManipulator(manipulator)
-return [vitaminCad]
+return [vitaminCad,thrust]

@@ -198,7 +198,8 @@ return new ICadGenerator(){
 		}
 		
 
-		if(linkIndex==2||linkIndex==1||linkIndex==0 ){
+		//if(linkIndex==2||linkIndex==1||linkIndex==0 ){
+		if(linkIndex==4||linkIndex==3||linkIndex==2||linkIndex==1||linkIndex==0  ){
 			LinkConfiguration confPrior = d.getLinkConfiguration(i+1);
 			def vitaminType = confPrior.getElectroMechanicalType()
 			def vitaminSize = confPrior.getElectroMechanicalSize()
@@ -210,6 +211,11 @@ return new ICadGenerator(){
 					motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,-90,0)))
 			if(linkIndex==2)
 				motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,-90,0)))
+			if(linkIndex==4) {
+				
+					motorLocation=new TransformNR(0,0,d.getDH_D(linkIndex+1)-centerTheMotorsValue,new RotationNR(0,0,0)).times(motorLocation.times(new TransformNR(0,0,d.getDH_D(linkIndex),new RotationNR(0,90,0))))
+					
+			}
 			vitaminLocations.put(motorLocation, [
 				vitaminType,
 				vitaminSize
