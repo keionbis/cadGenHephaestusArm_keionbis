@@ -199,12 +199,13 @@ return new ICadGenerator(){
 		
 
 		//if(linkIndex==2||linkIndex==1||linkIndex==0 ){
+		TransformNR motorLocation = new TransformNR(0,0,centerTheMotorsValue,new RotationNR())
 		if(linkIndex==4||linkIndex==3||linkIndex==2||linkIndex==1||linkIndex==0  ){
 			LinkConfiguration confPrior = d.getLinkConfiguration(i+1);
 			def vitaminType = confPrior.getElectroMechanicalType()
 			def vitaminSize = confPrior.getElectroMechanicalSize()
 			//println "Adding Motor "+vitaminType
-			def motorLocation = new TransformNR(0,0,centerTheMotorsValue,new RotationNR())
+			
 			if(linkIndex==0)
 				motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,180,0)))
 			if(linkIndex==1)
@@ -216,6 +217,7 @@ return new ICadGenerator(){
 					motorLocation=new TransformNR(0,0,d.getDH_D(linkIndex+1)-centerTheMotorsValue,new RotationNR(0,0,0)).times(motorLocation.times(new TransformNR(0,0,d.getDH_D(linkIndex),new RotationNR(0,90,0))))
 					
 			}
+			if(linkIndex<2)
 			vitaminLocations.put(motorLocation, [
 				vitaminType,
 				vitaminSize
@@ -228,7 +230,7 @@ return new ICadGenerator(){
 			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
 			"link3.groovy" , // file to load
 			// Parameters passed to the funcetion
-			[d, linkIndex,centerTheMotorsValue]
+			[d, linkIndex,centerTheMotorsValue,motorLocation]
 			))
 		}
 		if(linkIndex==3) {
@@ -236,7 +238,7 @@ return new ICadGenerator(){
 			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
 			"wrist1.groovy" , // file to load
 			// Parameters passed to the funcetion
-			[d, linkIndex,centerTheMotorsValue]
+			[d, linkIndex,centerTheMotorsValue,motorLocation]
 			))
 		}
 		if(linkIndex==4) {
@@ -244,7 +246,7 @@ return new ICadGenerator(){
 			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
 			"wrist2.groovy" , // file to load
 			// Parameters passed to the funcetion
-			[d, linkIndex,centerTheMotorsValue]
+			[d, linkIndex,centerTheMotorsValue,motorLocation]
 			))
 		}
 		if(linkIndex==5) {
@@ -252,7 +254,7 @@ return new ICadGenerator(){
 			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
 			"wrist3.groovy" , // file to load
 			// Parameters passed to the funcetion
-			[d, linkIndex,centerTheMotorsValue]
+			[d, linkIndex,centerTheMotorsValue,motorLocation]
 			))
 		}
 		

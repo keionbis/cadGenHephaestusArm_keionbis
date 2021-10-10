@@ -5,6 +5,7 @@ import com.neuronrobotics.sdk.addons.kinematics.DHLink
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase
+import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 import com.neuronrobotics.sdk.common.DeviceManager
 
@@ -31,7 +32,8 @@ if(args==null) {
 			)
 		return m
 	})
-	args = [base.getAllDHChains().get(0),4,centerTheMotorsValue]
+	def motorLocation = new TransformNR(0,0,centerTheMotorsValue,new RotationNR())
+	args = [base.getAllDHChains().get(0),4,centerTheMotorsValue,motorLocation]
 }
 int linkIndex = args[1]
 DHParameterKinematics d= args[0];
@@ -51,10 +53,15 @@ CSG vitaminCad=   Vitamins.get(	type,size)
 vitaminCad=moveDHValues(vitaminCad,dh)
 
 def mountPlateToHornTop = Vitamins.getConfiguration(type,size).get("mountPlateToHornTop")
-def bearingHeight =args[2]+mountPlateToHornTop-2
+def bearingHeight =mountPlateToHornTop-2 +d.getDH_D(linkIndex+1)
 CSG thrust = Vitamins.get("ballBearing","Thrust_1andAHalfinch")
 						.movez(bearingHeight)
 thrust.setManipulator(manipulator)
-						
+
+TransformNR motorLocation=args[3]
+CSG motor=   Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
+def part = motor.transformed(TransformFactory.nrToCSG(motorLocation))
+part.setManipulator(manipulator)
+
 vitaminCad.setManipulator(manipulator)
-return [vitaminCad,thrust]
+return [vitaminCad,thrust,part]
