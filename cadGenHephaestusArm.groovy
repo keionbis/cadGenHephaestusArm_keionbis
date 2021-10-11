@@ -657,6 +657,7 @@ return new ICadGenerator(){
 		CSG calibrationCore = baseCore
 								.intersect(corBox.toXMin())
 								.intersect(corBox.toYMin())
+								.rotz(-90)
 		def coreParts=[baseCore]
 		def boltHolePattern = []
 		def boltHoleKeepawayPattern = []
