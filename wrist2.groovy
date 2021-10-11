@@ -41,7 +41,7 @@ if(args==null) {
 	def d =base.getAllDHChains().get(0)
 	motorLocation=new TransformNR(0,0,d.getDH_D(5)-centerTheMotorsValue,new RotationNR(0,0,0))
 					.times(motorLocation
-						.times(new TransformNR(0,0,d.getDH_D(4),new RotationNR(0,90,0))))
+						.times(new TransformNR(0,0,d.getDH_D(4),new RotationNR(0,-90,0))))
 	
 	args = [d,4,centerTheMotorsValue,motorLocation]
 }

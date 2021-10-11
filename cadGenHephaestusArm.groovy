@@ -214,7 +214,7 @@ return new ICadGenerator(){
 				motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,-90,0)))
 			if(linkIndex==4) {
 				
-					motorLocation=new TransformNR(0,0,d.getDH_D(linkIndex+1)-centerTheMotorsValue,new RotationNR(0,0,0)).times(motorLocation.times(new TransformNR(0,0,d.getDH_D(linkIndex),new RotationNR(0,90,0))))
+					motorLocation=new TransformNR(0,0,d.getDH_D(linkIndex+1)-centerTheMotorsValue,new RotationNR(0,0,0)).times(motorLocation.times(new TransformNR(0,0,d.getDH_D(linkIndex),new RotationNR(0,-90,0))))
 					
 			}
 			if(linkIndex<2)
@@ -644,7 +644,7 @@ return new ICadGenerator(){
 		//Do additional CAD and add to the running CoM
 		def thrustMeasurments= Vitamins.getConfiguration("ballBearing",
 				thrustBearingSize)
-		def baseCorRad = thrustMeasurments.outerDiameter/2+5
+		double baseCorRad = thrustMeasurments.outerDiameter/2+5
 		CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight,36).toCSG()
 		CSG baseCoreshort = new Cylinder(baseCorRad,baseCorRad,baseCoreheight*3.0/4.0,36).toCSG()
 		CSG mountLug = new Cylinder(15,15,baseBoltThickness,36).toCSG().toZMax()
@@ -653,6 +653,10 @@ return new ICadGenerator(){
 				.toZMax()
 				.movez(-baseBoltThickness)
 		CSG mountUnit= mountLug.union(mountCap)
+		CSG corBox=baseCore.getBoundingBox();
+		CSG calibrationCore = baseCore
+								.intersect(corBox.toXMin())
+								.intersect(corBox.toYMin())
 		def coreParts=[baseCore]
 		def boltHolePattern = []
 		def boltHoleKeepawayPattern = []
@@ -675,7 +679,7 @@ return new ICadGenerator(){
 					)
 		}
 		
-		def locationOfCalibration = new TransformNR(0,-50,15, new RotationNR())
+		def locationOfCalibration = new TransformNR(0,-58.0,32, new RotationNR(-179.99,90,-55))
 		DHParameterKinematics dev = b.getAllDHChains().get(0)
 		//dev.setDesiredTaskSpaceTransform(locationOfCalibration, 0);
 		def jointSpaceVect = dev.inverseKinematics(dev.inverseOffset(locationOfCalibration));
@@ -683,12 +687,21 @@ return new ICadGenerator(){
 		println "\n\nCalibration Values "+jointSpaceVect+"\n at pose: "+poseInCal+"\n\n"
 				
 		def calibrationFrame = TransformFactory.nrToCSG(locationOfCalibration)
-								.movex(centerlineToOuterSurfaceNegativeZ)
-		def calibrationFramemountUnit=mountUnit
+								//.movex(centerlineToOuterSurfaceNegativeZ)
+		def calibrationFramemountUnit=calibrationCore
 										.rotx(180)
-										.toYMin()
-										.transformed(calibrationFrame)
+										//.toYMin()
 										.toZMin()
+										.movez(hornKeepawayLen)
+										.transformed(calibrationFrame)
+										.difference(ScriptingEngine.gitScriptRun(
+			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
+			"wrist3.groovy" , // file to load
+			// Parameters passed to the funcetion
+			null
+			).collect{it.transformed(calibrationFrame)}
+			)
+										//.toZMin()
 										
 		// assemble the base
 		def calibrationTipKeepaway =new RoundedCylinder(linkYDimention/2,centerlineToOuterSurfacePositiveZ-centerlineToOuterSurfaceNegativeZ)
@@ -696,7 +709,7 @@ return new ICadGenerator(){
 											.toCSG()
 											.roty(-90)
 									.transformed(calibrationFrame)
-		coreParts.add(calibrationTipKeepaway)			
+		//coreParts.add(calibrationTipKeepaway)			
 		def cordCutter = new Cube(10,40,30).toCSG()
 							.toYMin()
 							.toZMax()
@@ -718,16 +731,16 @@ return new ICadGenerator(){
 		
 		def Base = CSG.unionAll(coreParts)
 				.union(calibrationFramemountUnit)
-				.union(calibrationFramemountUnit.mirrory())
 				//.difference(vitamin_roundMotor_WPI_gb37y3530bracketOneKeepawayDistanceen)
 				.difference(vitamins)
-				.difference(calibrationTipKeepaway)
+				//.difference(calibrationTipKeepaway)
 				.difference(cordCutter);
 				
 			
 
-				
-		Base = Base.intersect(Base.getBoundingBox().toXMin().movex(-baseCorRad))		
+		CSG boundingBase=Base.getBoundingBox()
+		Base = Base.intersect(boundingBase.toXMin().movex(-baseCorRad))	
+		Base = Base.intersect(boundingBase.toZMin())
 		Base = Base.union(pointer.movex(Base.getMaxX()-2))
 						.union(pointer.rotz(90).movey(-baseCorRad+2))
 
