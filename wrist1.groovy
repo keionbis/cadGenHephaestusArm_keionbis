@@ -64,4 +64,4 @@ def part = motor.transformed(TransformFactory.nrToCSG(motorLocation))
 part.setManipulator(manipulator)
 
 vitaminCad.setManipulator(manipulator)
-return [vitaminCad,thrust,part]
+return [vitaminCad,thrust,part].collect{it.setColor(javafx.scene.paint.Color.GREY)}

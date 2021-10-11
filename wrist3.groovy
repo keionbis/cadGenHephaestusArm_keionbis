@@ -61,4 +61,4 @@ thrust.setManipulator(manipulator)
 //vitaminCad=moveDHValues(vitaminCad,dh)
 
 vitaminCad.setManipulator(manipulator)
-return [vitaminCad,thrust]
+return [vitaminCad,thrust].collect{it.setColor(javafx.scene.paint.Color.PINK)}
