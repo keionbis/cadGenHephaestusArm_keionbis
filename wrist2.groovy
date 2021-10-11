@@ -71,7 +71,10 @@ HornModel.setManipulator(manipulator)
 //Bearing 
 HashMap<String, Object> hornCOnfig = Vitamins.getConfiguration(type,size)
 def mountPlateToHornTop = hornCOnfig.get("mountPlateToHornTop")
-
+def bearingHeight =mountPlateToHornTop-2 +d.getDH_D(linkIndex+1)
+CSG thrust = Vitamins.get("ballBearing","Thrust_1andAHalfinch")
+						.movez(bearingHeight)
+thrust.setManipulator(manipulator)
 //END bearing
 
 
@@ -142,4 +145,4 @@ passiveSide.setManipulator(manipulator)
 
 passiveSide.setColor(Color.RED)
 
-return [HornModel,part,hornkw,driveSide,passiveSide].collect{it.setColor(javafx.scene.paint.Color.RED)}
+return [HornModel,part,hornkw,driveSide,passiveSide,thrust].collect{it.setColor(javafx.scene.paint.Color.RED)}
