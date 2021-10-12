@@ -88,7 +88,7 @@ def centerTobottom = args[2]+motormeasurments.shoulderHeight
 def centerToTop=args[2]+mountPlateToHornTop
 def kwCanheight =args[2]+centerTobottom
 def linkageThicknessSMallShaftLen = motormeasurments.bottomShaftLength
-println "xValue = "+b_y+" hyp = "+hyp
+
 CSG keepawayCan = new Cylinder(hyp, kwCanheight).toCSG()
 					.toZMax()
 					.movez(args[2])
