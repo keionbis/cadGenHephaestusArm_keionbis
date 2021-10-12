@@ -94,9 +94,9 @@ def centerToTop=args[2]+mountPlateToHornTop
 def kwCanheight =args[2]+centerTobottom
 def linkageThicknessSMallShaftLen = motormeasurments.bottomShaftLength
 
-CSG keepawayCan = new Cylinder(hyp, kwCanheight).toCSG()
+CSG keepawayCan = new Cylinder(hyp+1, kwCanheight+1).toCSG()
 					.toZMax()
-					.movez(args[2])
+					.movez(args[2]+1)
 CSG shaftKW = new Cylinder(motormeasurments.bottomShaftDiameter/2+0.5, kwCanheight+linkageThicknessSMallShaftLen*4).toCSG()
 				.toZMax()
 				.movez(args[2])			
@@ -112,7 +112,8 @@ hornkw.setManipulator(manipulator)
 
 // Hull Bulding BLocks
 def cornerRad=2
-double linkThickness = mountPlateToHornTop
+double baseCorRad = Vitamins.getConfiguration("ballBearing","Thrust_1andAHalfinch").outerDiameter/2+5
+double linkThickness = baseCorRad-centerToTop
 double linkYDimention = motormeasurments.body_x;
 CSG linkBuildingBlockRoundCyl = new Cylinder(linkYDimention/2,linkYDimention/2,linkThickness,30)
 .toCSG()
@@ -126,30 +127,69 @@ CSG linkBuildingBlockRound = new RoundedCylinder(linkYDimention/2,linkThickness)
 //END building blocks
 
 //Drive Side
+def backsetBoltOne = -linkYDimention/2-5
+def backsetBoltTwo=-25.0/2
 CSG shaftMount = linkBuildingBlockRound
 					.movez(centerToTop)
+CSG nutsert = moveDHValues(
+				Vitamins.get("heatedThreadedInsert", "M5")
+				.toZMax().movez(centerToTop),dh)
+				.movez(backsetBoltOne)
+				.movex(-backsetBoltTwo/2)
+				.movez(d.getDH_D(linkIndex+1))
+CSG nutsert2=nutsert.movex(backsetBoltTwo)
 
+CSG bolt = moveDHValues(
+	Vitamins.get("capScrew", "M5")
+	.movez(centerToTop+linkThickness),dh)
+	.movez(backsetBoltOne)
+	.movex(-backsetBoltTwo/2)
+	.movez(d.getDH_D(linkIndex+1)).setManipulator(manipulator)
+CSG bolt2=bolt.movex(backsetBoltTwo)
+.setManipulator(manipulator)
 CSG driveSide = moveDHValues(shaftMount,dh)
+CSG driveConnector = driveSide.movez(d.getDH_D(linkIndex+1))
+						.movez(backsetBoltOne)
+						.movex(-backsetBoltTwo/2)
+CSG driveBolt2=driveConnector.movex(backsetBoltTwo)
+
+CSG driveUnit=driveConnector
+					.union(driveSide)
+					.union(driveBolt2)
+					.hull()
+driveSide=driveSide.union(driveUnit)
 				.difference(HornModel)
+				.difference([bolt,bolt2])
 driveSide.setManipulator(manipulator)
 //END Drive side
 
 //PassiveSIde
-double baseCorRad = Vitamins.getConfiguration("ballBearing","Thrust_1andAHalfinch").outerDiameter/2+5
 def passiveTHickness = baseCorRad-centerTobottom
 println "Link thickness = "+linkThickness+" passive side = "+passiveTHickness
 CSG passiveMount = new RoundedCylinder(linkYDimention/2,passiveTHickness)
 					.cornerRadius(cornerRad)
-					.toCSG()	
+					.toCSG()
 					.movez(-baseCorRad)
 
 CSG passiveSide = moveDHValues(passiveMount,dh)
-					.difference(keepawayCan)
+CSG passivConnector = passiveSide.movez(d.getDH_D(linkIndex+1))
+						.movez(backsetBoltOne)
+						.movex(-backsetBoltTwo/2)
+CSG passivBolt2=passivConnector.movex(backsetBoltTwo)
+
+CSG passiveUnit=	passivConnector
+						.union(passiveSide)
+						.union(passivBolt2)
+						.hull()
+
+							
+passiveSide=passiveSide.union(passiveUnit)
+					
 passiveSide.setManipulator(manipulator)
 //End Passive Side
 
 //Servo mount
-def supportBeam= new RoundedCube(motormeasurments.body_x+linkThickness*2.0,motormeasurments.body_y+linkThickness*2,15)
+def supportBeam= new RoundedCube(baseCorRad*2.0,motormeasurments.body_y+linkThickness*2,25)
 					.cornerRadius(cornerRad).toCSG()
 					.toZMax()
 					.toYMin()
