@@ -653,8 +653,9 @@ return new ICadGenerator(){
 				.toZMax()
 				.movez(-baseBoltThickness)
 		CSG mountUnit= mountLug.union(mountCap)
-		CSG corBox=baseCore.getBoundingBox();
-		CSG calibrationCore = baseCore
+		CSG allCore = baseCore.union(baseCore.movey(3).movex(3)).hull()
+		CSG corBox=allCore.getBoundingBox();
+		CSG calibrationCore = allCore
 								.intersect(corBox.toXMin())
 								.intersect(corBox.toYMin())
 								.rotz(-90)
@@ -680,7 +681,7 @@ return new ICadGenerator(){
 					)
 		}
 		
-		def locationOfCalibration = new TransformNR(0,-65.0,40, new RotationNR(-179.99,90,-55))
+		def locationOfCalibration = new TransformNR(0,-65.0,40, new RotationNR(-179.99,90,-60))
 		DHParameterKinematics dev = b.getAllDHChains().get(0)
 		dev.setDesiredTaskSpaceTransform(locationOfCalibration, 0);
 		def jointSpaceVect = dev.inverseKinematics(dev.inverseOffset(locationOfCalibration));

@@ -61,16 +61,23 @@ def bearingHeight =mountPlateToHornTop-2
 CSG thrust = Vitamins.get("ballBearing","Thrust_1andAHalfinch")
 						.movez(bearingHeight)
 thrust.setManipulator(manipulator)
-
-				//.movez(args[2]*2)
-//vitaminCad=moveDHValues(vitaminCad,dh)
-
-
-//END vitamins
-
-// Link
 def thrustMeasurments= Vitamins.getConfiguration("ballBearing","Thrust_1andAHalfinch")
 double baseCorRad = thrustMeasurments.outerDiameter/2+5
+//END vitamins
+
+//Mount holes
+CSG mount = Vitamins.get("heatedThreadedInsert", "M5")
+			.toZMax()
+			.movez(baseCoreheight+mountPlateToHornTop)
+			.movex(25.0)
+def mounts =[]
+for(def i=0;i<360;i+=90) {
+	mounts.add(mount.rotz(i).setManipulator(manipulator))
+}
+//end Mount holes
+
+// Link
+
 CSG allignment = Parabola.coneByHeight(4, 8)
 						.rotx(-90)
 						.toZMin()
@@ -83,8 +90,12 @@ CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight,36).toCSG()
 				.difference(thrust)
 				.difference(vitaminCad)
 				.difference(allignment)
+				.difference(mounts)
 baseCore.setManipulator(manipulator)
 //END link
 
 
-return [vitaminCad,thrust,baseCore].collect{it.setColor(javafx.scene.paint.Color.PINK)}
+mounts.addAll([vitaminCad,thrust,baseCore])
+
+return mounts.collect{it.setColor(javafx.scene.paint.Color.PINK)}
+
