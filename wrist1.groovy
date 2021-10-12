@@ -11,6 +11,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 import com.neuronrobotics.sdk.common.DeviceManager
 
 import eu.mihosoft.vrl.v3d.CSG
+import eu.mihosoft.vrl.v3d.Cylinder
+import eu.mihosoft.vrl.v3d.RoundedCube
 import eu.mihosoft.vrl.v3d.Transform
 import javafx.scene.transform.Affine
 
@@ -49,19 +51,58 @@ Affine manipulator = dh.getListener();
 
 def type=	d.getLinkConfiguration(linkIndex-1).getShaftType()
 def size = d.getLinkConfiguration(linkIndex-1).getShaftSize()
-CSG vitaminCad=   Vitamins.get(	type,size)
-				.movez(args[2])
-vitaminCad=moveDHValues(vitaminCad,dh)
+CSG shaft=   Vitamins.get(	type,size)
+				
+shaft=moveDHValues(shaft,dh)
 def mountPlateToHornTop = Vitamins.getConfiguration(type,size).get("mountPlateToHornTop")
-def bearingHeight =args[2]+mountPlateToHornTop-2
+def bearingHeight =mountPlateToHornTop-2
 CSG thrust = moveDHValues(Vitamins.get("ballBearing","Thrust_1andAHalfinch")
 						.movez(bearingHeight),dh)
 thrust.setManipulator(manipulator)
 
 TransformNR motorLocation=args[3]
 CSG motor=   Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
-def part = motor.transformed(TransformFactory.nrToCSG(motorLocation))
-part.setManipulator(manipulator)
+def motorModel = motor.transformed(TransformFactory.nrToCSG(motorLocation))
+				.setManipulator(manipulator)
 
-vitaminCad.setManipulator(manipulator)
-return [vitaminCad,thrust,part].collect{it.setColor(javafx.scene.paint.Color.GREY)}
+shaft.setManipulator(manipulator)
+
+//Servo mount
+HashMap<String, Object> motormeasurments = Vitamins.getConfiguration(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
+double linkThickness = mountPlateToHornTop
+def cornerRad=2
+double baseCorRad = Vitamins.getConfiguration("ballBearing","Thrust_1andAHalfinch").outerDiameter/2+5
+
+def supportBeam= moveDHValues(new RoundedCube(motormeasurments.body_y+linkThickness*2.0,motormeasurments.body_x+linkThickness*2,25)
+						.cornerRadius(cornerRad).toCSG()
+						.toZMax()
+						.movez(d.getDH_D(linkIndex)-motormeasurments.body_x/2)
+					,dh)
+//END Servo Mount
+
+// Bearing Mount
+HashMap<String, Object> hornCOnfig = Vitamins.getConfiguration(type,size)
+def baseCoreheight = shaft.getTotalZ()-mountPlateToHornTop
+CSG hornKW = moveDHValues(new Cylinder(hornCOnfig.hornDiameter/2+1, d.getDH_D(linkIndex)).toCSG()
+							.movez(mountPlateToHornTop+7)
+	,dh)
+				.setManipulator(manipulator)
+CSG baseCore = moveDHValues(new Cylinder(baseCorRad,baseCorRad,baseCoreheight,36).toCSG()
+								.toZMin()
+								.movez(mountPlateToHornTop)
+				,dh)
+				.union(supportBeam.toYMax().movey(supportBeam.getMinY()+cornerRad*2))
+				.hull()
+				.union(supportBeam)
+				.difference(shaft)
+				.difference(thrust)
+				.difference(motorModel)
+				.difference(hornKW)
+				.setManipulator(manipulator)
+//END Bearing Mount
+
+
+return [shaft,thrust,motorModel,baseCore].collect{it.setColor(javafx.scene.paint.Color.GREY)}
+
+
+

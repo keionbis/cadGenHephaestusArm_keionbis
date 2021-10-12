@@ -82,8 +82,8 @@ TransformNR motorLocation=args[3]
 
 //Motor for next link
 CSG motor=   Vitamins.get(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
-def part = motor.transformed(TransformFactory.nrToCSG(motorLocation))
-part.setManipulator(manipulator)
+def motorModel = motor.transformed(TransformFactory.nrToCSG(motorLocation))
+motorModel.setManipulator(manipulator)
 
 // Keepaway for motor of this link
 HashMap<String, Object> motormeasurments = Vitamins.getConfiguration(conf.getElectroMechanicalType(),conf.getElectroMechanicalSize())
@@ -135,14 +135,43 @@ driveSide.setManipulator(manipulator)
 //END Drive side
 
 //PassiveSIde
-CSG passiveMount = linkBuildingBlockRound	
-					.movez(-centerTobottom-linkThickness)
+double baseCorRad = Vitamins.getConfiguration("ballBearing","Thrust_1andAHalfinch").outerDiameter/2+5
+def passiveTHickness = baseCorRad-centerTobottom
+println "Link thickness = "+linkThickness+" passive side = "+passiveTHickness
+CSG passiveMount = new RoundedCylinder(linkYDimention/2,passiveTHickness)
+					.cornerRadius(cornerRad)
+					.toCSG()	
+					.movez(-baseCorRad)
 
 CSG passiveSide = moveDHValues(passiveMount,dh)
 					.difference(keepawayCan)
 passiveSide.setManipulator(manipulator)
 //End Passive Side
 
+//Servo mount
+def supportBeam= new RoundedCube(motormeasurments.body_x+linkThickness*2.0,motormeasurments.body_y+linkThickness*2,15)
+					.cornerRadius(cornerRad).toCSG()
+					.toZMax()
+					.toYMin()
+					.movey(-baseCorRad)
+					.transformed(TransformFactory.nrToCSG(motorLocation))
+//END Servo Mount
+
+// Bearing Mount
+def baseCoreheight = vitaminCad.getTotalZ()-mountPlateToHornTop
+
+CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-1,36).toCSG()
+				.toZMax()
+				.movez(mountPlateToHornTop-1)
+				.transformed(TransformFactory.nrToCSG(motorLocation))
+				.union(supportBeam)
+				.hull()
+				.difference(thrust)
+				.difference(motorModel)
+				.difference(hornkw)
+				.setManipulator(manipulator)
+//END Bearing Mount
+
 passiveSide.setColor(Color.RED)
 
-return [HornModel,part,hornkw,driveSide,passiveSide,thrust].collect{it.setColor(javafx.scene.paint.Color.RED)}
+return [HornModel,motorModel,hornkw,driveSide,passiveSide,thrust,baseCore].collect{it.setColor(javafx.scene.paint.Color.RED)}

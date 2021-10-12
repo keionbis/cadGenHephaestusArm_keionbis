@@ -211,7 +211,7 @@ return new ICadGenerator(){
 			if(linkIndex==1)
 					motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,-90,0)))
 			if(linkIndex==2)
-				motorLocation=motorLocation.times(new TransformNR(0,0,0,new RotationNR(0,-90,0)))
+				motorLocation=new TransformNR().times(new TransformNR(0,0,0,new RotationNR(0,-90,0)))
 			if(linkIndex==4) {
 				
 					motorLocation=new TransformNR(0,0,d.getDH_D(linkIndex+1)-centerTheMotorsValue,new RotationNR(0,0,0)).times(motorLocation.times(new TransformNR(0,0,d.getDH_D(linkIndex),new RotationNR(0,-90,0))))
@@ -683,7 +683,7 @@ return new ICadGenerator(){
 		
 		def locationOfCalibration = new TransformNR(0,-65.0,40, new RotationNR(-179.99,90,-60))
 		DHParameterKinematics dev = b.getAllDHChains().get(0)
-		dev.setDesiredTaskSpaceTransform(locationOfCalibration, 0);
+		//dev.setDesiredTaskSpaceTransform(locationOfCalibration, 0);
 		def jointSpaceVect = dev.inverseKinematics(dev.inverseOffset(locationOfCalibration));
 		def poseInCal = dev.forwardOffset(dev.forwardKinematics(jointSpaceVect));
 		println "\n\nCalibration Values "+jointSpaceVect+"\n at pose: "+poseInCal+"\n\n"
