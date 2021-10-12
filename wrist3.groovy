@@ -10,6 +10,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 import com.neuronrobotics.sdk.common.DeviceManager
 
 import eu.mihosoft.vrl.v3d.CSG
+import eu.mihosoft.vrl.v3d.Cylinder
+import eu.mihosoft.vrl.v3d.Parabola
 import eu.mihosoft.vrl.v3d.Transform
 import javafx.scene.transform.Affine
 
@@ -46,12 +48,15 @@ LinkConfiguration  conf = d.getLinkConfiguration(linkIndex);
 AbstractLink abstractLink = d.getAbstractLink(linkIndex);
 // Transform used by the UI to render the location of the object
 Affine manipulator = dh.getListener();
-
+//Vitamins 
 def type=	d.getLinkConfiguration(linkIndex-1).getShaftType()
 def size = d.getLinkConfiguration(linkIndex-1).getShaftSize()
 CSG vitaminCad=   Vitamins.get(	type,size)
+vitaminCad.setManipulator(manipulator)
+
 
 def mountPlateToHornTop = Vitamins.getConfiguration(type,size).get("mountPlateToHornTop")
+def baseCoreheight = vitaminCad.getTotalZ()-mountPlateToHornTop
 def bearingHeight =mountPlateToHornTop-2
 CSG thrust = Vitamins.get("ballBearing","Thrust_1andAHalfinch")
 						.movez(bearingHeight)
@@ -60,5 +65,26 @@ thrust.setManipulator(manipulator)
 				//.movez(args[2]*2)
 //vitaminCad=moveDHValues(vitaminCad,dh)
 
-vitaminCad.setManipulator(manipulator)
-return [vitaminCad,thrust].collect{it.setColor(javafx.scene.paint.Color.PINK)}
+
+//END vitamins
+
+// Link
+def thrustMeasurments= Vitamins.getConfiguration("ballBearing","Thrust_1andAHalfinch")
+double baseCorRad = thrustMeasurments.outerDiameter/2+5
+CSG allignment = Parabola.coneByHeight(4, 8)
+						.rotx(-90)
+						.toZMin()
+						.movez(baseCoreheight)
+						.toYMin()
+						.movey(-baseCorRad)
+						.rotz(45)
+CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight,36).toCSG()
+				.movez(mountPlateToHornTop)
+				.difference(thrust)
+				.difference(vitaminCad)
+				.difference(allignment)
+baseCore.setManipulator(manipulator)
+//END link
+
+
+return [vitaminCad,thrust,baseCore].collect{it.setColor(javafx.scene.paint.Color.PINK)}
