@@ -857,7 +857,7 @@ return new ICadGenerator(){
 		})
 		paper.setColor(javafx.scene.paint.Color.WHITE)
 		
-		allCad.addAll(Base,paper,pcbmount,board)//cardboard,board,paper
+		allCad.addAll(Base,paper,board)//cardboard,board,paper
 		Base.addExportFormat("stl")
 		Base.addExportFormat("svg")
 		Base.setName("BaseMount")
