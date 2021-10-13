@@ -103,9 +103,12 @@ CSG baseCore = moveDHValues(new Cylinder(baseCorRad,baseCorRad,baseCoreheight,36
 				.difference(hornKW)
 				.setManipulator(manipulator)
 //END Bearing Mount
+baseCore.setName("WristLink1")
+baseCore.setManufacturing({
+	it.rotx(-90).toZMin()
+})
 
-
-return [shaft,thrust,motorModel,baseCore].collect{it.setColor(javafx.scene.paint.Color.GREY)}
+return [baseCore].collect{it.setColor(javafx.scene.paint.Color.GREY)}
 
 
 
