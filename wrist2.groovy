@@ -215,6 +215,14 @@ CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-1,36).toCSG()
 				.setManipulator(manipulator)
 //END Bearing Mount
 
-passiveSide.setColor(Color.RED)
+driveSide.setManufacturing({
+	it.rotx(-90).toZMin()
+})
+baseCore.setManufacturing({
+	it.rotx(-90).toZMin()
+})
+driveSide.setName("wrist2Drive")
+baseCore.setName("wrist2ThrustBearingSide")
 
-return [HornModel,motorModel,hornkw,driveSide,thrust,baseCore].collect{it.setColor(javafx.scene.paint.Color.RED)}
+
+return [driveSide,baseCore].collect{it.setColor(javafx.scene.paint.Color.RED)}
