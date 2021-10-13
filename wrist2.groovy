@@ -189,11 +189,12 @@ passiveSide.setManipulator(manipulator)
 //End Passive Side
 
 //Servo mount
-def supportBeam= new RoundedCube(baseCorRad*2.0,motormeasurments.body_y+linkThickness*2,25)
+def supportBeam= new RoundedCube(baseCorRad*2.0-cornerRad,motormeasurments.body_y+linkThickness*2,25)
 					.cornerRadius(cornerRad).toCSG()
 					.toZMax()
 					.toYMin()
 					.movey(-baseCorRad)
+					.movex(cornerRad/2)
 					.transformed(TransformFactory.nrToCSG(motorLocation))
 //END Servo Mount
 
@@ -206,12 +207,14 @@ CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-1,36).toCSG()
 				.transformed(TransformFactory.nrToCSG(motorLocation))
 				.union(supportBeam)
 				.hull()
+				.union(passiveSide)
 				.difference(thrust)
 				.difference(motorModel)
 				.difference(hornkw)
+				.difference([bolt,bolt2,nutsert,nutsert2,driveSide,keepawayCan])
 				.setManipulator(manipulator)
 //END Bearing Mount
 
 passiveSide.setColor(Color.RED)
 
-return [HornModel,motorModel,hornkw,driveSide,passiveSide,thrust,baseCore].collect{it.setColor(javafx.scene.paint.Color.RED)}
+return [HornModel,motorModel,hornkw,driveSide,thrust,baseCore].collect{it.setColor(javafx.scene.paint.Color.RED)}
