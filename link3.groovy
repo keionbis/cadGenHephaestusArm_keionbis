@@ -213,6 +213,15 @@ CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-1,36).toCSG()
 				.setManipulator(manipulator)
 //END Bearing Mount
 def vitamins =	[HornModel,thrust,hornkw,bolt,bolt2]
+driveSide.setManufacturing({
+	it.rotx(90).toZMin()
+})
+baseCore.setManufacturing({
+	it.rotx(90).toZMin()
+})
+driveSide.setName("elbowDriveLink")
+baseCore.setName("elbowThrustBearingSideLink")
+
 return [driveSide,baseCore].collect{it.setColor(javafx.scene.paint.Color.LIGHTPINK)}
 
 
