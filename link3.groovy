@@ -124,24 +124,26 @@ CSG linkBuildingBlockRound = new RoundedCylinder(linkYDimention/2,linkThickness)
 //Drive Side
 def backsetBoltOne = -linkYDimention/2-5
 def backsetBoltTwo=-25.0/2
+double bodyEdgeToShaft = motormeasurments.body_x/2.0
+def boltheight  =d.getDH_R(linkIndex) +bodyEdgeToShaft+3
 CSG shaftMount = linkBuildingBlockRound
 					.movez(centerToTop)
 CSG nutsert = moveDHValues(
 				Vitamins.get("heatedThreadedInsert", "M5")
 				.toZMax().movez(centerToTop),dh)
 				.movez(backsetBoltOne)
-				.movex(d.getDH_R(linkIndex))
+				.movex(boltheight)
 CSG nutsert2=nutsert.movez(backsetBoltTwo)
 
 CSG bolt = moveDHValues(
 	Vitamins.get("capScrew", "M5")
 	.movez(centerToTop+linkThickness),dh)
 	.movez(backsetBoltOne)
-	.movex(d.getDH_R(linkIndex)).setManipulator(manipulator)
+	.movex(boltheight).setManipulator(manipulator)
 CSG bolt2=bolt.movez(backsetBoltTwo)
 .setManipulator(manipulator)
 CSG driveSide = moveDHValues(shaftMount,dh)
-CSG driveConnector = driveSide.movex(d.getDH_R(linkIndex))
+CSG driveConnector = driveSide.movex(boltheight)
 						.movez(backsetBoltOne)
 CSG driveBolt2=driveConnector.movez(backsetBoltTwo)
 
@@ -176,7 +178,7 @@ CSG passiveMount = new RoundedCylinder(linkYDimention/2,passiveTHickness)
 					.movez(-baseCorRad)
 
 CSG passiveSide = moveDHValues(passiveMount,dh)
-CSG passivConnector = passiveSide.movex(d.getDH_R(linkIndex))
+CSG passivConnector = passiveSide.movex(boltheight)
 						.movez(backsetBoltOne)
 CSG passivBolt2=passivConnector.movez(backsetBoltTwo)
 
@@ -210,6 +212,7 @@ CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-1,36).toCSG()
 				.difference(keepawayCan)
 				.setManipulator(manipulator)
 //END Bearing Mount
-return [HornModel,thrust,motorModel,hornkw,driveSide,baseCore,bolt,bolt2].collect{it.setColor(javafx.scene.paint.Color.LIGHTPINK)}
+def vitamins =	[HornModel,thrust,hornkw,bolt,bolt2]
+return [driveSide,baseCore].collect{it.setColor(javafx.scene.paint.Color.LIGHTPINK)}
 
 
