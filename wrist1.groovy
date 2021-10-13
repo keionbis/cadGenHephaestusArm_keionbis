@@ -73,11 +73,14 @@ double linkThickness = mountPlateToHornTop
 def cornerRad=2
 double baseCorRad = Vitamins.getConfiguration("ballBearing","Thrust_1andAHalfinch").outerDiameter/2+5
 
-def supportBeam= moveDHValues(new RoundedCube(motormeasurments.body_y+linkThickness*2.0,motormeasurments.body_x+linkThickness*2,25)
+def supportBeam= new RoundedCube(motormeasurments.body_y+linkThickness+motormeasurments.shoulderHeight,25,motormeasurments.body_x+linkThickness*2.0-2)
 						.cornerRadius(cornerRad).toCSG()
-						.toZMax()
-						.movez(d.getDH_D(linkIndex)-motormeasurments.body_x/2)
-					,dh)
+						.toXMax()
+						.movex(motormeasurments.body_y/2+linkThickness)
+						.toYMax()
+						.movey(-motormeasurments.body_x/2-3)
+						.roty(90)
+					
 //END Servo Mount
 
 // Bearing Mount
