@@ -95,7 +95,17 @@ baseCore.setManipulator(manipulator)
 //END link
 
 
-mounts.addAll([vitaminCad,thrust,baseCore])
+mounts.addAll([vitaminCad,thrust])
+for(CSG c:mounts) {
+	c.setManufacturing({
+		return null
+	})
+}
+baseCore.setManufacturing({
+		return it.toZMin()
+	})
+baseCore.setName("EndEffectorPlate")
+mounts.add(baseCore)
 
 return mounts.collect{it.setColor(javafx.scene.paint.Color.PINK)}
 
