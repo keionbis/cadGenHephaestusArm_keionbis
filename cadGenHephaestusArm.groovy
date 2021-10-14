@@ -654,10 +654,10 @@ return new ICadGenerator(){
 				.movez(-baseBoltThickness)
 		CSG mountUnit= mountLug.union(mountCap)
 		CSG allCore = baseCore.union(baseCore.movey(3).movex(3)).hull()
-		CSG corBox=allCore.getBoundingBox();
+		CSG corBox=allCore.getBoundingBox().toXMin().toYMin();
 		CSG calibrationCore = allCore
-								.intersect(corBox.toXMin())
-								.intersect(corBox.toYMin())
+								.intersect(corBox)
+								.intersect(corBox.rotz(-25))
 								.rotz(-90)
 		def coreParts=[baseCore]
 		def boltHolePattern = []

@@ -102,7 +102,7 @@ for(CSG c:mounts) {
 	})
 }
 baseCore.setManufacturing({
-		return it.toZMin()
+		return it.rotx(180).toZMin()
 	})
 baseCore.setName("EndEffectorPlate")
 mounts.add(baseCore)
