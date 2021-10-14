@@ -78,12 +78,12 @@ for(def i=0;i<360;i+=90) {
 
 // Link
 
-CSG allignment = Parabola.coneByHeight(4, 8)
+CSG allignment = Parabola.coneByHeight(4, 6)
 						.rotx(-90)
 						.toZMin()
 						.movez(baseCoreheight)
 						.toYMin()
-						.movey(-baseCorRad)
+						.movey(-baseCorRad+2)
 						.rotz(45)
 CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight,36).toCSG()
 				.movez(mountPlateToHornTop)
