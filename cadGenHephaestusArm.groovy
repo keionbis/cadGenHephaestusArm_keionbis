@@ -7,6 +7,7 @@ import com.neuronrobotics.bowlerstudio.BowlerStudio
 import com.neuronrobotics.bowlerstudio.creature.CreatureLab;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.params.AllClientPNames
+import org.eclipse.jetty.server.handler.MovedContextHandler
 
 import com.neuronrobotics.bowlerstudio.vitamins.*;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink
@@ -368,6 +369,7 @@ return new ICadGenerator(){
 							.union(motorSidePlate)
 							.difference(vitamins)
 							.difference(motorToCut)
+							
 
 								
 			
@@ -382,6 +384,9 @@ return new ICadGenerator(){
 
 		if(linkIndex==0) {
 			def z = dh.getD()-linkYDimention/2-movingPartClearence
+			CSG hornKeepawy = moveDHValues(new Cylinder(hornDiameter/2,dh.getD()+1).toCSG()
+					.movez(6),dh)
+			
 			def supportBeam= new RoundedCube(linkYDimention+linkThickness*2.0,40+linkThickness*2,z)
 								.cornerRadius(cornerRad)
 								.toCSG()
@@ -401,6 +406,7 @@ return new ICadGenerator(){
 						.union(supportBeam.movez(z+movingPartClearence))
 						.transformed( TransformFactory.nrToCSG(locationOfBearing))
 						.difference(vitamins)
+						.difference(hornKeepawy)
 			baseOfArm.setColor(javafx.scene.paint.Color.WHITE)
 			baseOfArm.setManipulator(manipulator)
 			baseOfArm.setName("BaseCone")

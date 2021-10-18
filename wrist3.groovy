@@ -106,6 +106,5 @@ baseCore.setManufacturing({
 	})
 baseCore.setName("EndEffectorPlate")
 mounts.add(baseCore)
-
 return mounts.collect{it.setColor(javafx.scene.paint.Color.PINK)}
 

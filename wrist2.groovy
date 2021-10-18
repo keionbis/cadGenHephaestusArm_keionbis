@@ -224,5 +224,4 @@ baseCore.setManufacturing({
 driveSide.setName("wrist2Drive")
 baseCore.setName("wrist2ThrustBearingSide")
 
-
 return [driveSide,baseCore].collect{it.setColor(javafx.scene.paint.Color.RED)}
