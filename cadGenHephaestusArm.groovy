@@ -691,8 +691,17 @@ return new ICadGenerator(){
 		DHParameterKinematics dev = b.getAllDHChains().get(0)
 		//dev.setDesiredTaskSpaceTransform(locationOfCalibration, 0);
 		def jointSpaceVect = dev.inverseKinematics(dev.inverseOffset(locationOfCalibration));
+		def jointInts=[]
+		def upperInts=[]
+		def lowerInts=[]
+		for(int i=0;i<jointSpaceVect.length;i++) {
+			jointInts[i] = Math.round(jointSpaceVect[i]*100)
+			upperInts[i]=Math.round(dev.getMaxEngineeringUnits(i)*100)
+			lowerInts[i]=Math.round(dev.getMinEngineeringUnits(i)*100)
+			
+		}
 		def poseInCal = dev.forwardOffset(dev.forwardKinematics(jointSpaceVect));
-		println "\n\nCalibration Values "+jointSpaceVect+"\n at pose: "+poseInCal+"\n\n"
+		println "\n\nCalibration Values "+jointInts+"\nUpper Lim= "+upperInts+"\nLower Lim"+lowerInts+"\nat pose: \n"+poseInCal+"\n\n"
 				
 		def calibrationFrame = TransformFactory.nrToCSG(locationOfCalibration)
 								//.movex(centerlineToOuterSurfaceNegativeZ)
