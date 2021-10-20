@@ -195,8 +195,8 @@
 	<type>pidg-link</type>
 	<index>3</index>
 	<scale>2.0</scale>
-	<upperLimit>180.0</upperLimit>
-	<lowerLimit>0.0</lowerLimit>
+	<upperLimit>145.0</upperLimit>
+	<lowerLimit>35.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
 	<staticOffset>90.0</staticOffset>
@@ -251,8 +251,8 @@
 	<type>pidg-link</type>
 	<index>4</index>
 	<scale>2.0</scale>
-	<upperLimit>179.0</upperLimit>
-	<lowerLimit>0.0</lowerLimit>
+	<upperLimit>145.0</upperLimit>
+	<lowerLimit>35.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
 	<staticOffset>90.0</staticOffset>
@@ -307,8 +307,8 @@
 	<type>pidg-link</type>
 	<index>5</index>
 	<scale>2.0</scale>
-	<upperLimit>180.0</upperLimit>
-	<lowerLimit>0.0</lowerLimit>
+	<upperLimit>145.0</upperLimit>
+	<lowerLimit>35.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
 	<staticOffset>90.0</staticOffset>
