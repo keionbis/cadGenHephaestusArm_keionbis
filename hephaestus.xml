@@ -251,11 +251,11 @@
 	<type>pidg-link</type>
 	<index>4</index>
 	<scale>2.0</scale>
-	<upperLimit>145.0</upperLimit>
-	<lowerLimit>35.0</lowerLimit>
+	<upperLimit>167.5</upperLimit>
+	<lowerLimit>57.5</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
-	<staticOffset>90.0</staticOffset>
+	<staticOffset>70.0</staticOffset>
 	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
 	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
 	<isLatch>false</isLatch>
