@@ -27,13 +27,13 @@
 	<type>udp-7dof-float</type>
 	<index>0</index>
 	<scale>1.0</scale>
-	<upperLimit>180.0</upperLimit>
-	<lowerLimit>0.0</lowerLimit>
+	<upperLimit>90.0</upperLimit>
+	<lowerLimit>-90.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
-	<staticOffset>90.0</staticOffset>
+	<staticOffset>0.0</staticOffset>
 	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
-	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
+	<deviceTheoreticalMin>-180.0</deviceTheoreticalMin>
 	<isLatch>true</isLatch>
 	<indexLatch>105.0</indexLatch>
 	<isStopOnLatch>false</isStopOnLatch>
@@ -83,13 +83,13 @@
 	<type>udp-7dof-float</type>
 	<index>1</index>
 	<scale>2.0</scale>
-	<upperLimit>137.5</upperLimit>
-	<lowerLimit>47.5</lowerLimit>
+	<upperLimit>47.5</upperLimit>
+	<lowerLimit>-47.5</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
-	<staticOffset>90.0</staticOffset>
+	<staticOffset>0.0</staticOffset>
 	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
-	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
+	<deviceTheoreticalMin>-180.0</deviceTheoreticalMin>
 	<isLatch>true</isLatch>
 	<indexLatch>97.0</indexLatch>
 	<isStopOnLatch>false</isStopOnLatch>
@@ -139,13 +139,13 @@
 	<type>udp-7dof-float</type>
 	<index>2</index>
 	<scale>1.0</scale>
-	<upperLimit>180.0</upperLimit>
-	<lowerLimit>0.0</lowerLimit>
+	<upperLimit>90.0</upperLimit>
+	<lowerLimit>-90.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
-	<staticOffset>90.0</staticOffset>
+	<staticOffset>0.0</staticOffset>
 	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
-	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
+	<deviceTheoreticalMin>-180.0</deviceTheoreticalMin>
 	<isLatch>true</isLatch>
 	<indexLatch>145.0</indexLatch>
 	<isStopOnLatch>false</isStopOnLatch>
@@ -195,13 +195,13 @@
 	<type>udp-7dof-float</type>
 	<index>3</index>
 	<scale>2.0</scale>
-	<upperLimit>145.0</upperLimit>
-	<lowerLimit>35.0</lowerLimit>
+	<upperLimit>55.0</upperLimit>
+	<lowerLimit>-55.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
-	<staticOffset>90.0</staticOffset>
+	<staticOffset>0.0</staticOffset>
 	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
-	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
+	<deviceTheoreticalMin>-180.0</deviceTheoreticalMin>
 	<isLatch>false</isLatch>
 	<indexLatch>0.0</indexLatch>
 	<isStopOnLatch>false</isStopOnLatch>
@@ -251,13 +251,13 @@
 	<type>udp-7dof-float</type>
 	<index>4</index>
 	<scale>2.0</scale>
-	<upperLimit>167.5</upperLimit>
-	<lowerLimit>57.5</lowerLimit>
+	<upperLimit>97.5</upperLimit>
+	<lowerLimit>-12.5</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
-	<staticOffset>70.0</staticOffset>
+	<staticOffset>0.0</staticOffset>
 	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
-	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
+	<deviceTheoreticalMin>-180.0</deviceTheoreticalMin>
 	<isLatch>false</isLatch>
 	<indexLatch>0.0</indexLatch>
 	<isStopOnLatch>false</isStopOnLatch>
@@ -307,13 +307,13 @@
 	<type>udp-7dof-float</type>
 	<index>5</index>
 	<scale>2.0</scale>
-	<upperLimit>145.0</upperLimit>
-	<lowerLimit>35.0</lowerLimit>
+	<upperLimit>55.0</upperLimit>
+	<lowerLimit>-55.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
-	<staticOffset>90.0</staticOffset>
+	<staticOffset>0.0</staticOffset>
 	<deviceTheoreticalMax>180.0</deviceTheoreticalMax>
-	<deviceTheoreticalMin>0.0</deviceTheoreticalMin>
+	<deviceTheoreticalMin>-180.0</deviceTheoreticalMin>
 	<isLatch>false</isLatch>
 	<indexLatch>0.0</indexLatch>
 	<isStopOnLatch>false</isStopOnLatch>
