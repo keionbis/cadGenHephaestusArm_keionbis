@@ -82,7 +82,7 @@
 	<deviceName>GroguArm</deviceName>
 	<type>udp-7dof-float</type>
 	<index>1</index>
-	<scale>2.0</scale>
+	<scale>1.0</scale>
 	<upperLimit>47.5</upperLimit>
 	<lowerLimit>-47.5</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
@@ -194,7 +194,7 @@
 	<deviceName>GroguArm</deviceName>
 	<type>udp-7dof-float</type>
 	<index>3</index>
-	<scale>2.0</scale>
+	<scale>1.0</scale>
 	<upperLimit>55.0</upperLimit>
 	<lowerLimit>-55.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
@@ -250,7 +250,7 @@
 	<deviceName>GroguArm</deviceName>
 	<type>udp-7dof-float</type>
 	<index>4</index>
-	<scale>2.0</scale>
+	<scale>1.0</scale>
 	<upperLimit>97.5</upperLimit>
 	<lowerLimit>-12.5</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
@@ -306,7 +306,7 @@
 	<deviceName>GroguArm</deviceName>
 	<type>udp-7dof-float</type>
 	<index>5</index>
-	<scale>2.0</scale>
+	<scale>1.0</scale>
 	<upperLimit>55.0</upperLimit>
 	<lowerLimit>-55.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
