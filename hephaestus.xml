@@ -83,8 +83,8 @@
 	<type>udp-7dof-float</type>
 	<index>1</index>
 	<scale>1.0</scale>
-	<upperLimit>47.5</upperLimit>
-	<lowerLimit>-47.5</lowerLimit>
+	<upperLimit>90.0</upperLimit>
+	<lowerLimit>-90.0</lowerLimit>
 	<upperVelocity>1.0E8</upperVelocity>
 	<lowerVelocity>-1.0E8</lowerVelocity>
 	<staticOffset>0.0</staticOffset>
