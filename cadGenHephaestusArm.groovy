@@ -689,7 +689,7 @@ return new ICadGenerator(){
 		
 		def locationOfCalibration = new TransformNR(0,-65.0,40, new RotationNR(-179.99,90,-60))
 		DHParameterKinematics dev = b.getAllDHChains().get(0)
-		dev.setDesiredTaskSpaceTransform(locationOfCalibration, 0);
+		//dev.setDesiredTaskSpaceTransform(locationOfCalibration, 0);
 		def jointSpaceVect = dev.inverseKinematics(dev.inverseOffset(locationOfCalibration));
 		def jointInts=[]
 		def upperInts=[]
