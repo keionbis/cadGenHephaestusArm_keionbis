@@ -201,9 +201,9 @@ def supportBeam= new RoundedCube(baseCorRad*2.0-cornerRad,motormeasurments.body_
 // Bearing Mount
 def baseCoreheight = vitaminCad.getTotalZ()-mountPlateToHornTop
 
-CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-1,36).toCSG()
+CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-0.25,36).toCSG()
 				.toZMax()
-				.movez(mountPlateToHornTop-1)
+				.movez(mountPlateToHornTop-0.25)
 				.transformed(TransformFactory.nrToCSG(motorLocation))
 				.union(supportBeam)
 				.hull()

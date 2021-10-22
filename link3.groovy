@@ -196,9 +196,9 @@ passiveSide.setManipulator(manipulator)
 // Bearing Mount
 def baseCoreheight = vitaminCad.getTotalZ()-mountPlateToHornTop
 
-CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-1,36).toCSG()
+CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-0.25,36).toCSG()
 				.toZMax()
-				.movez(mountPlateToHornTop-1)
+				.movez(mountPlateToHornTop-0.25)
 				.union(supportBeam)
 				.union([passivConnector,passivBolt2,driveConnector,driveBolt2])
 				.hull()
