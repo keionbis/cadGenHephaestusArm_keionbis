@@ -75,7 +75,8 @@ return new ICadGenerator(){
 	
 
 	double GripperServoYOffset = 35
-	
+	double grooveDepth=1
+	double springRadius=30
 
 	
 	def cornerRad=2
@@ -180,7 +181,8 @@ return new ICadGenerator(){
 			])
 		}
 		CSG vitamin_LewanSoulHorn_round_m3_bolts = Vitamins.get("LewanSoulHorn", "round_m3_bolts")
-
+		double springSupportLength = linkYDimention+linkThickness*2.0+30
+		double linkOneSupportWidth=40+linkThickness*2
 		if(linkIndex==1) {
 			def mountBoltOne =locationOfMotorMount.copy()
 							.times(new TransformNR().translateZ(centerlineToOuterSurfacePositiveZ+linkThickness)
@@ -197,7 +199,26 @@ return new ICadGenerator(){
 				insert)
 			
 		}
-		
+		if(linkIndex==0) {
+			def mountBoltOne =locationOfMotorMount.copy()
+								.times(new TransformNR(-springSupportLength+insertMeasurments.diameter+cornerRadius,
+									-linkOneSupportWidth/2,
+									insertMeasurments.diameter/2+cornerRadius,new RotationNR(90,0,0)))
+				
+					//.translateY(-centerlineToOuterSurfaceNegativeZ+linkThickness)
+				//.translateX(-insertMeasurments.diameter-cornerRadius)
+				
+			def mountBoltTwo=locationOfMotorMount.copy()
+								.times(new TransformNR(-springSupportLength+insertMeasurments.diameter+cornerRadius,
+									linkOneSupportWidth/2,
+									insertMeasurments.diameter/2+cornerRadius,new RotationNR(-90,0,0)))
+			vitaminLocations.put(mountBoltOne.times(new TransformNR().translateZ(5)),["capScrew", boltsize])
+			vitaminLocations.put(mountBoltOne.times(new TransformNR().translateZ(-insertMeasurments.installLength)),
+				insert)
+			vitaminLocations.put(mountBoltTwo.times(new TransformNR().translateZ(5)),["capScrew", boltsize])
+			vitaminLocations.put(mountBoltTwo.times(new TransformNR().translateZ(-insertMeasurments.installLength)),
+				insert)
+		}
 
 		//if(linkIndex==2||linkIndex==1||linkIndex==0 ){
 		TransformNR motorLocation = new TransformNR(0,0,centerTheMotorsValue,new RotationNR())
@@ -359,17 +380,49 @@ return new ICadGenerator(){
 			CSG MotorMountBracketkw = actuatorCirclekw.movez(-offsetOfLinks)
 							.union(motorLinkkw)
 							.hull()
+			//Sprint path section	
+
+			CSG grooveInner = new Cylinder(springRadius,springRadius-grooveDepth/2,linkThickness/2,60).toCSG()
+			CSG grooveOuter = new Cylinder(springRadius-grooveDepth/2,springRadius,linkThickness/2,60).toCSG().movez(linkThickness/2)
+			CSG springPathCore=grooveInner.union(grooveOuter)
+			
+			CSG springPathCoreKW=springPathCore.getBoundingBox()
+			springPathCore=springPathCore
+			double offsetSprings = actuatorCircle.getMaxZ()
+			def springPathDriveSideCutout=springPathCore.hull().toZMax()
+								.movez(offsetSprings)
+								.union(springPathCore.hull().toZMax()
+								.movez(-linkOneSupportWidth/2))
+			def springPath=springPathCore.difference(springPathCoreKW.toXMin())
+			def radiusOfSpringBoltKW = springRadius/3
+			def springMountKW =  new Cylinder(radiusOfSpringBoltKW,linkThickness).toCSG()
+									.movey(-springRadius-4)
+									.rotz(28)
+								
+			def springPathDriveMountKW = moveDHValues(springMountKW.toZMax().movez(offsetSprings),dh)
+			def springPathPassiveMountKW = moveDHValues(springMountKW.toZMin().movez(-springSupportLength/2-0.5),dh)
+			
+			def springPathDrive = moveDHValues(springPath.toZMax().movez(offsetSprings),dh)
+			def springPathPassive = moveDHValues(springPath.toZMin().movez(-springSupportLength/2-0.5),dh)
+			//end Spring path section				
+								
 			CSG MotorMountBracket = actuatorCircle.movez(-offsetOfLinks)
 							.union(motorLink)
 							.hull()
+							.union(springPathDrive)
 							.difference(vitamins)
+							
+
 			def FullBracket =CSG.unionAll([center,passiveSide,brace])
 							//.difference(motorSidePlatekw.getBoundingBox())
 							.difference(MotorMountBracket)
 							.union(motorSidePlate)
+							
+							.difference([springPathDriveSideCutout])
 							.difference(vitamins)
 							.difference(motorToCut)
-							
+							.union(springPathPassive)
+							.difference([springPathDriveMountKW,springPathPassiveMountKW])
 
 								
 			
@@ -390,8 +443,13 @@ return new ICadGenerator(){
 			def supportBeam= new RoundedCube(linkYDimention+linkThickness*2.0,40+linkThickness*2,z)
 								.cornerRadius(cornerRad)
 								.toCSG()
+								
 								.toZMax()
-			
+			def springSupport= new RoundedCube(springSupportLength,linkOneSupportWidth,z)
+								.cornerRadius(cornerRad)
+								.toCSG()
+								.movex(-30)
+								.toZMax()
 			def	baseOfArm = Parabola.coneByHeight(baseCorRad, 25)
 						.rotx(90)
 						.toZMin()
@@ -403,7 +461,7 @@ return new ICadGenerator(){
 							.getBoundingBox()
 							.movez(z)
 							)
-						.union(supportBeam.movez(z+movingPartClearence))
+						.union(supportBeam.union(springSupport).movez(z+movingPartClearence))
 						.transformed( TransformFactory.nrToCSG(locationOfBearing))
 						.difference(vitamins)
 						.difference(hornKeepawy)
