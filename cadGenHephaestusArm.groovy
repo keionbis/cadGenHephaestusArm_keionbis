@@ -76,7 +76,7 @@ return new ICadGenerator(){
 
 	double GripperServoYOffset = 35
 	double grooveDepth=1
-	double springRadius=30
+	double springRadius=35
 
 	
 	def cornerRad=2
@@ -180,10 +180,21 @@ return new ICadGenerator(){
 				thrustBearingSize
 			])
 		}
+		double springboltRotation=22
 		CSG vitamin_LewanSoulHorn_round_m3_bolts = Vitamins.get("LewanSoulHorn", "round_m3_bolts")
 		double springSupportLength = linkYDimention+linkThickness*2.0+30
 		double linkOneSupportWidth=40+linkThickness*2
 		if(linkIndex==1) {
+
+			def springBolt = locationOfMotorMount.copy().times(new TransformNR(0,0,0,new RotationNR(0,-springboltRotation,0))).times(new TransformNR()
+				.translateZ(centerlineToOuterSurfacePositiveZ+linkThickness).translateY(-springRadius-4))
+			
+			def springBolt2 = locationOfMotorMount.copy()
+			.times(new TransformNR(0,0,0,new RotationNR(0,-springboltRotation,0)))
+			.times(new TransformNR()
+				.translateZ(-springSupportLength/2-0.5).translateY(-springRadius-4))
+			.times(new TransformNR(0,0,0,new RotationNR(180,0,0)))
+			
 			def mountBoltOne =locationOfMotorMount.copy()
 							.times(new TransformNR().translateZ(centerlineToOuterSurfacePositiveZ+linkThickness)
 								.translateY(-bracketOneKeepawayDistance))
@@ -197,7 +208,12 @@ return new ICadGenerator(){
 			vitaminLocations.put(mountBoltTwo,["capScrew", boltsize])
 			vitaminLocations.put(mountBoltTwo.times(new TransformNR().translateZ(-linkThickness-insertMeasurments.installLength)),
 				insert)
-			
+			vitaminLocations.put(springBolt,["capScrew", boltsize])
+			vitaminLocations.put(springBolt.times(new TransformNR().translateZ(-linkThickness-insertMeasurments.installLength)),
+				insert)
+			vitaminLocations.put(springBolt2,["capScrew", boltsize])
+			vitaminLocations.put(springBolt2.times(new TransformNR().translateZ(-linkThickness-insertMeasurments.installLength)),
+				insert)
 		}
 		if(linkIndex==0) {
 			def mountBoltOne =locationOfMotorMount.copy()
@@ -394,10 +410,13 @@ return new ICadGenerator(){
 								.union(springPathCore.hull().toZMax()
 								.movez(-linkOneSupportWidth/2))
 			def springPath=springPathCore.difference(springPathCoreKW.toXMin())
-			def radiusOfSpringBoltKW = springRadius/3
+			def radiusOfSpringBoltKW = springRadius/4
 			def springMountKW =  new Cylinder(radiusOfSpringBoltKW,linkThickness).toCSG()
+									.union(new Cylinder(radiusOfSpringBoltKW,linkThickness).toCSG().movey(-dh.getR()-springRadius))
+									.union(new Cylinder(radiusOfSpringBoltKW,linkThickness).toCSG().movex(-springRadius))
+									.hull()
 									.movey(-springRadius-4)
-									.rotz(28)
+									.rotz(springboltRotation)
 								
 			def springPathDriveMountKW = moveDHValues(springMountKW.toZMax().movez(offsetSprings),dh)
 			def springPathPassiveMountKW = moveDHValues(springMountKW.toZMin().movez(-springSupportLength/2-0.5),dh)
