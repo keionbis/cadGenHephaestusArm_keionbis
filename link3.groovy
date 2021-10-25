@@ -121,9 +121,59 @@ CSG linkBuildingBlockRound = new RoundedCylinder(linkYDimention/2,linkThickness)
 .toCSG()
 //END building blocks
 
-//Drive Side
+//Sprint path section
 def backsetBoltOne = -linkYDimention/2-5
 def backsetBoltTwo=-25.0/2
+double grooveDepth=1
+double springRadius=35
+double springboltRotation=22
+double springSupportLength = linkYDimention+linkThickness*2.0+30
+double linkOneSupportWidth=40+linkThickness*2
+CSG grooveInner = new Cylinder(springRadius,springRadius-grooveDepth/2,linkThickness/2,60).toCSG()
+CSG grooveOuter = new Cylinder(springRadius-grooveDepth/2,springRadius,linkThickness/2,60).toCSG().movez(linkThickness/2)
+CSG springPathCore=grooveInner.union(grooveOuter)
+
+CSG springPathCoreKW=springPathCore.getBoundingBox()
+springPathCore=springPathCore
+
+double offsetSprings = centerToTop+linkThickness
+def springPathDriveSideCutout=springPathCore.hull().toZMax()
+					.movez(offsetSprings)
+					.union(springPathCore.hull().toZMax()
+					.movez(-linkOneSupportWidth/2))
+def springPath=springPathCore.difference(springPathCoreKW.toXMin().toYMin())
+							.difference(springPathCoreKW.toXMin().toYMin().rotz(35))
+				.rotz(-35)
+def radiusOfSpringBoltKW = springRadius/4
+def springMountKW =  new Cylinder(radiusOfSpringBoltKW,linkThickness).toCSG()
+						.union(new Cylinder(radiusOfSpringBoltKW,linkThickness).toCSG().movey(-dh.getR()-springRadius))
+						.union(new Cylinder(radiusOfSpringBoltKW,linkThickness).toCSG().movex(-springRadius))
+						.hull()
+						.movey(-springRadius-4)
+						.rotz(springboltRotation)
+					
+def springPathDriveMountKW = moveDHValues(springMountKW.toZMax().movez(offsetSprings),dh)
+def springPathPassiveMountKW = moveDHValues(springMountKW.toZMin().movez(-springSupportLength/2-0.5),dh)
+
+def springPathDrive = moveDHValues(springPath.toZMax().movez(offsetSprings),dh)
+def springPathPassive = moveDHValues(springPath.toZMin().movez(-baseCorRad),dh)
+def nutMeasurments= Vitamins.getConfiguration("heatedThreadedInsert", "M5")
+double nutheight=nutMeasurments.installLength
+double nutsertRadiout = nutMeasurments.diameter/2.0
+def SpringLug = new RoundedCylinder(nutsertRadiout*2, nutheight).cornerRadius(cornerRad).toCSG()
+def SpringLugLowerSupport =CSG.unionAll([SpringLug.movey(nutsertRadiout*3),SpringLug.movex(-nutsertRadiout*3).movey(nutsertRadiout*3)])
+def springMount = SpringLug.union([SpringLugLowerSupport.movez(nutheight)]).hull()
+					.difference(new Cylinder(nutsertRadiout,nutheight).toCSG())
+					.difference(new Cylinder(5.1/2.0,nutheight*2).toCSG().movez(nutheight))
+					.movex(springRadius+nutsertRadiout)
+					.rotz(45)
+def springMountDrive=moveDHValues(springMount.mirrorz().toZMax().movez(offsetSprings-nutheight),dh)
+def springMountPassive=moveDHValues(springMount.toZMin().movez(-baseCorRad+nutheight),dh)
+
+//end Spring path section
+
+//Drive Side
+
 double bodyEdgeToShaft = motormeasurments.body_x/2.0
 def boltheight  =d.getDH_R(linkIndex) +bodyEdgeToShaft+3
 CSG shaftMount = linkBuildingBlockRound
@@ -152,6 +202,7 @@ CSG driveUnit=driveConnector
 					.union(driveBolt2)
 					.hull()
 driveSide=driveSide.union(driveUnit)
+				.union(springPathDrive)
 				.difference(HornModel)
 				.difference([bolt,bolt2])
 driveSide.setManipulator(manipulator)
@@ -166,9 +217,10 @@ def supportBeam= new RoundedCube(baseCorRad*2.0,motormeasurments.body_y+linkThic
 					.movey(-motormeasurments.body_x/2+linkThickness/4)
 					.transformed(TransformFactory.nrToCSG(motorLocation))
 //END Servo Mount
+					
 
 
-				
+
 //PassiveSIde
 def passiveTHickness = baseCorRad-centerTobottom
 println "Link thickness = "+linkThickness+" passive side = "+passiveTHickness
@@ -188,7 +240,8 @@ CSG passiveUnit=	passivConnector
 						.hull()
 
 							
-passiveSide=passiveSide.union(passiveUnit)
+passiveSide=passiveSide.union([passiveUnit])
+				
 					
 passiveSide.setManipulator(manipulator)
 //End Passive Side
@@ -203,6 +256,8 @@ CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-0.25,36).toCSG(
 				.union([passivConnector,passivBolt2,driveConnector,driveBolt2])
 				.hull()
 				.union(passiveSide)
+				.union(springPathPassive)
+				
 				.difference(thrust)
 				.difference(driveSide)
 				.difference(motorModel)
@@ -210,6 +265,7 @@ CSG baseCore = new Cylinder(baseCorRad,baseCorRad,baseCoreheight-0.25,36).toCSG(
 				.difference([nutsert,nutsert2])
 				.difference([bolt,bolt2])
 				.difference(keepawayCan)
+				.union([springMountDrive,springMountPassive])
 				.setManipulator(manipulator)
 //END Bearing Mount
 def vitamins =	[HornModel,thrust,hornkw,bolt,bolt2]

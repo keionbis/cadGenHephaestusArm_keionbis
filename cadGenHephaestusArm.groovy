@@ -73,7 +73,7 @@ return new ICadGenerator(){
 	double thrustBearing_inset_Into_bottom = 1
 	double topOfHornToBotomOfBaseLinkDistance = movingPartClearence-thrustBearing_inset_Into_bottom
 	
-
+	double springboltRotation=22
 	double GripperServoYOffset = 35
 	double grooveDepth=1
 	double springRadius=35
@@ -180,7 +180,7 @@ return new ICadGenerator(){
 				thrustBearingSize
 			])
 		}
-		double springboltRotation=22
+		
 		CSG vitamin_LewanSoulHorn_round_m3_bolts = Vitamins.get("LewanSoulHorn", "round_m3_bolts")
 		double springSupportLength = linkYDimention+linkThickness*2.0+30
 		double linkOneSupportWidth=40+linkThickness*2
@@ -405,10 +405,10 @@ return new ICadGenerator(){
 			CSG springPathCoreKW=springPathCore.getBoundingBox()
 			springPathCore=springPathCore
 			double offsetSprings = actuatorCircle.getMaxZ()
-			def springPathDriveSideCutout=springPathCore.hull().toZMax()
-								.movez(offsetSprings)
-								.union(springPathCore.hull().toZMax()
-								.movez(-linkOneSupportWidth/2))
+			def springPathDriveSideCutout=new Cylinder(springRadius+1,springRadius+1,linkThickness,60).toCSG().toZMax()
+								.movez(offsetSprings-0.5)
+								.union(new Cylinder(springRadius+1,springRadius+1,linkThickness,60).toCSG().toZMax()
+								.movez(-linkOneSupportWidth/2+0.5))
 			def springPath=springPathCore.difference(springPathCoreKW.toXMin())
 			def radiusOfSpringBoltKW = springRadius/4
 			def springMountKW =  new Cylinder(radiusOfSpringBoltKW,linkThickness).toCSG()
