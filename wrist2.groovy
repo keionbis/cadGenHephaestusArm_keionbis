@@ -97,7 +97,7 @@ def linkageThicknessSMallShaftLen = motormeasurments.bottomShaftLength
 CSG keepawayCan = new Cylinder(hyp+1, kwCanheight+1).toCSG()
 					.toZMax()
 					.movez(args[2]+1)
-CSG shaftKW = new Cylinder(motormeasurments.bottomShaftDiameter/2+0.5, kwCanheight+linkageThicknessSMallShaftLen*4).toCSG()
+CSG shaftKW = new Cylinder(motormeasurments.bottomShaftDiameter/2, kwCanheight+linkageThicknessSMallShaftLen*4).toCSG()
 				.toZMax()
 				.movez(args[2])			
 keepawayCan=moveDHValues(keepawayCan.union(shaftKW),dh)

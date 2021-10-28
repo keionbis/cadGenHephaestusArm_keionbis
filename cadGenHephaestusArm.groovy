@@ -75,7 +75,7 @@ return new ICadGenerator(){
 	
 	double springboltRotation=22
 	double GripperServoYOffset = 35
-	double grooveDepth=1
+	
 	double springRadius=35
 
 	
@@ -102,6 +102,7 @@ return new ICadGenerator(){
 	
 	
 	double linkThickness = hornKeepawayLen
+	double grooveDepth=linkThickness/2
 	double centerlineToOuterSurfacePositiveZ = centerTheMotorsValue+hornKeepawayLen
 	double centerlineToOuterSurfaceNegativeZ = -(centerTheMotorsValue+movingPartClearence+linkThickness)
 	CSG linkBuildingBlockRoundCyl = new Cylinder(linkYDimention/2,linkYDimention/2,linkThickness,30)

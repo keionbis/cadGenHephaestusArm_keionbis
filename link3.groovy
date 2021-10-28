@@ -92,7 +92,7 @@ def linkageThicknessSMallShaftLen = motormeasurments.bottomShaftLength
 CSG keepawayCan = new Cylinder(hyp+1, kwCanheight+1).toCSG()
 					.toZMax()
 					.movez(args[2]+1)
-CSG shaftKW = new Cylinder(motormeasurments.bottomShaftDiameter/2+0.5, kwCanheight+linkageThicknessSMallShaftLen*4).toCSG()
+CSG shaftKW = new Cylinder(motormeasurments.bottomShaftDiameter/2, kwCanheight+linkageThicknessSMallShaftLen*4).toCSG()
 				.toZMax()
 				.movez(args[2])			
 keepawayCan=moveDHValues(keepawayCan.union(shaftKW),dh)
@@ -118,13 +118,13 @@ CSG linkBuildingBlockRoundSqu = new RoundedCube(linkYDimention,linkYDimention,li
 .toZMin()
 CSG linkBuildingBlockRound = new RoundedCylinder(linkYDimention/2,linkThickness)
 .cornerRadius(cornerRad)
-.toCSG()
+.toCSG() 
 //END building blocks
 
 //Sprint path section
 def backsetBoltOne = -linkYDimention/2-5
 def backsetBoltTwo=-25.0/2
-double grooveDepth=1
+double grooveDepth=linkThickness/2
 double springRadius=35
 double springboltRotation=22
 double springSupportLength = linkYDimention+linkThickness*2.0+30
