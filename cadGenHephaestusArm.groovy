@@ -296,7 +296,14 @@ return new ICadGenerator(){
 			[d, linkIndex,centerTheMotorsValue,motorLocation]
 			))
 		}
-		
+		if(linkIndex==6) {
+			allCad.addAll(ScriptingEngine.gitScriptRun(
+			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git", // git location of the library
+			"tool.groovy" , // file to load
+			// Parameters passed to the funcetion
+			[d, linkIndex,centerTheMotorsValue,motorLocation]
+			))
+		}
 		//CSG tmpSrv = moveDHValues(servo,dh)
 
 		//Compute the location of the base of this limb to place objects at the root of the limb
